@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import init_db
+from .api import api_router
 
 app = FastAPI(
     title="Local Skill Hub",
@@ -18,6 +19,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register API routes
+app.include_router(api_router, prefix="/api")
 
 
 @app.on_event("startup")

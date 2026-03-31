@@ -1,0 +1,7 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [{
+      "hooks": [{"type": "command", "command": ".qoder/hooks/superpowers-context.sh"}]
+    }]
+  }
+}

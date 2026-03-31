@@ -81,6 +81,10 @@ Installation (安装记录)
 | 版本对比 | 本地版本 vs IDE 安装版本 |
 | 升级安装 | 重新安装以更新到新版本 |
 
+**安装路径说明**：
+- **用户级安装**：自动使用默认路径（如 `~/.qoder/`）
+- **项目级安装**：需要用户输入项目目录路径（LSH 不预设项目位置）
+
 ### 4. 对话式交互
 
 | 功能 | 说明 |
@@ -143,7 +147,7 @@ CREATE TABLE installations (
     group_id INTEGER REFERENCES groups(id),
     target_ide TEXT NOT NULL,     -- 'qoder' | 'cursor'
     install_scope TEXT NOT NULL,  -- 'user' | 'project'
-    install_path TEXT NOT NULL,   -- 安装目标路径
+    install_path TEXT NOT NULL,   -- 安装目标路径（项目级需用户输入）
     installed_files_json TEXT,    -- 已安装文件列表
     installed_version TEXT,       -- 安装时的版本
     installed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

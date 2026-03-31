@@ -2902,6 +2902,746 @@ git commit -m "chore: final cleanup and verification"
 
 ---
 
+## Phase 6: Agent 对话功能
+
+### Task 17: 创建 Agent 核心模块
+
+**Files:**
+- Create: `backend/app/agent/__init__.py`
+- Create: `backend/app/agent/prompts.py`
+- Create: `backend/app/agent/tools.py`
+- Create: `backend/app/agent/core.py`
+
+- [ ] **Step 1: 创建 agent/__init__.py**
+
+```python
+"""Agent module."""
+from .core import Agent
+from .tools import AgentTools
+```
+
+- [ ] **Step 2: 创建 prompts.py**
+
+```python
+"""Agent system prompts."""
+
+SYSTEM_PROMPT = """
+你是 Local Skill Hub 的内置助手。你可以帮助用户管理 AI IDE 技能包。
+
+你有以下能力：
+1. **导入技能包**：从 Git 仓库或本地路径导入技能包
+2. **管理分组**：创建分组、将技能包添加到分组
+3. **安装到 IDE**：将分组安装到 Qoder 或 Cursor
+4. **卸载/切换**：卸载已安装的分组，或切换到另一个分组
+5. **查看状态**：列出技能包、分组、安装状态
+
+当用户请求操作时，使用对应的工具来完成。如果需要更多信息（如项目路径），请询问用户。
+
+回复时使用中文，保持简洁友好。
+"""
+
+TOOL_DESCRIPTIONS = {
+    "import_from_git": "从 Git URL 导入技能包",
+    "import_from_local": "从本地路径导入技能包",
+    "list_packages": "列出所有已导入的技能包",
+    "create_group": "创建一个新的分组",
+    "list_groups": "列出所有分组",
+    "add_to_group": "将技能包添加到分组",
+    "install_group": "将分组安装到指定 IDE",
+    "uninstall": "卸载已安装的分组",
+    "list_installations": "列出所有安装记录",
+    "compare_versions": "对比已安装版本和本地版本",
+}
+```
+
+- [ ] **Step 3: 创建 tools.py**
+
+```python
+"""Agent tools - callable functions for the agent."""
+from typing import Optional, List, Dict, Any
+from sqlalchemy.orm import Session
+
+from ..services import PackageService, GroupService, InstallService
+
+
+class AgentTools:
+    """Tools that the agent can call."""
+
+    def __init__(self, db: Session):
+        self.db = db
+        self.package_service = PackageService(db)
+        self.group_service = GroupService(db)
+        self.install_service = InstallService(db)
+
+    def import_from_git(self, url: str, name: Optional[str] = None) -> Dict[str, Any]:
+        """Import package from Git URL."""
+        try:
+            package = self.package_service.import_from_git(url, name)
+            return {
+                "success": True,
+                "message": f"成功导入技能包 '{package.name}'，版本: {package.version}",
+                "package": {"id": package.id, "name": package.name, "version": package.version}
+            }
+        except Exception as e:
+            return {"success": False, "message": f"导入失败: {str(e)}"}
+
+    def import_from_local(self, path: str, name: Optional[str] = None) -> Dict[str, Any]:
+        """Import package from local path."""
+        try:
+            package = self.package_service.import_from_local(path, name)
+            return {
+                "success": True,
+                "message": f"成功导入技能包 '{package.name}'",
+                "package": {"id": package.id, "name": package.name}
+            }
+        except Exception as e:
+            return {"success": False, "message": f"导入失败: {str(e)}"}
+
+    def list_packages(self) -> Dict[str, Any]:
+        """List all packages."""
+        packages = self.package_service.list_packages()
+        return {
+            "success": True,
+            "packages": [
+                {"id": p.id, "name": p.name, "version": p.version}
+                for p in packages
+            ]
+        }
+
+    def create_group(self, name: str, description: Optional[str] = None) -> Dict[str, Any]:
+        """Create a new group."""
+        try:
+            group = self.group_service.create_group(name, description)
+            return {
+                "success": True,
+                "message": f"成功创建分组 '{group.name}'",
+                "group": {"id": group.id, "name": group.name}
+            }
+        except Exception as e:
+            return {"success": False, "message": f"创建失败: {str(e)}"}
+
+    def list_groups(self) -> Dict[str, Any]:
+        """List all groups."""
+        groups = self.group_service.list_groups()
+        result = []
+        for g in groups:
+            result.append({
+                "id": g.id,
+                "name": g.name,
+                "packages": [p.name for p in g.packages]
+            })
+        return {"success": True, "groups": result}
+
+    def add_to_group(self, group_name: str, package_name: str) -> Dict[str, Any]:
+        """Add package to group by name."""
+        group = self.group_service.get_group_by_name(group_name)
+        if not group:
+            return {"success": False, "message": f"分组 '{group_name}' 不存在"}
+
+        packages = self.package_service.list_packages()
+        package = next((p for p in packages if p.name == package_name), None)
+        if not package:
+            return {"success": False, "message": f"技能包 '{package_name}' 不存在"}
+
+        self.group_service.add_package_to_group(group.id, package.id)
+        return {
+            "success": True,
+            "message": f"已将 '{package_name}' 添加到分组 '{group_name}'"
+        }
+
+    def install_group(
+        self,
+        group_name: str,
+        target_ide: str,
+        install_scope: str,
+        install_path: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Install group to IDE."""
+        group = self.group_service.get_group_by_name(group_name)
+        if not group:
+            return {"success": False, "message": f"分组 '{group_name}' 不存在"}
+
+        if install_scope == "project" and not install_path:
+            return {
+                "success": False,
+                "message": "项目级安装需要提供项目路径，请告诉我你的项目目录"
+            }
+
+        try:
+            installation = self.install_service.install_group(
+                group.id, target_ide, install_scope, install_path
+            )
+            return {
+                "success": True,
+                "message": f"成功将 '{group_name}' 安装到 {target_ide} ({install_scope})",
+                "installation": {"id": installation.id, "path": installation.install_path}
+            }
+        except Exception as e:
+            return {"success": False, "message": f"安装失败: {str(e)}"}
+
+    def uninstall(self, installation_id: int) -> Dict[str, Any]:
+        """Uninstall by installation ID."""
+        try:
+            success = self.install_service.uninstall(installation_id)
+            if success:
+                return {"success": True, "message": "卸载成功"}
+            return {"success": False, "message": "安装记录不存在"}
+        except Exception as e:
+            return {"success": False, "message": f"卸载失败: {str(e)}"}
+
+    def list_installations(self) -> Dict[str, Any]:
+        """List all installations."""
+        installations = self.install_service.list_installations()
+        result = []
+        for inst in installations:
+            group_name = inst.group.name if inst.group else "未知"
+            result.append({
+                "id": inst.id,
+                "group": group_name,
+                "ide": inst.target_ide,
+                "scope": inst.install_scope,
+                "path": inst.install_path,
+                "version": inst.installed_version
+            })
+        return {"success": True, "installations": result}
+
+    def compare_versions(self, installation_id: int) -> Dict[str, Any]:
+        """Compare installed vs local versions."""
+        result = self.install_service.compare_versions(installation_id)
+        if not result:
+            return {"success": False, "message": "安装记录不存在"}
+        return {"success": True, **result}
+
+    def get_tools_schema(self) -> List[Dict[str, Any]]:
+        """Get OpenAI-compatible tools schema."""
+        return [
+            {
+                "type": "function",
+                "function": {
+                    "name": "import_from_git",
+                    "description": "从 Git URL 导入技能包",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "url": {"type": "string", "description": "Git 仓库 URL"},
+                            "name": {"type": "string", "description": "可选的包名称"}
+                        },
+                        "required": ["url"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "import_from_local",
+                    "description": "从本地路径导入技能包",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "path": {"type": "string", "description": "本地路径"},
+                            "name": {"type": "string", "description": "可选的包名称"}
+                        },
+                        "required": ["path"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "list_packages",
+                    "description": "列出所有已导入的技能包",
+                    "parameters": {"type": "object", "properties": {}}
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "create_group",
+                    "description": "创建一个新的分组",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string", "description": "分组名称"},
+                            "description": {"type": "string", "description": "分组描述"}
+                        },
+                        "required": ["name"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "list_groups",
+                    "description": "列出所有分组",
+                    "parameters": {"type": "object", "properties": {}}
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "add_to_group",
+                    "description": "将技能包添加到分组",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "group_name": {"type": "string", "description": "分组名称"},
+                            "package_name": {"type": "string", "description": "技能包名称"}
+                        },
+                        "required": ["group_name", "package_name"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "install_group",
+                    "description": "将分组安装到指定 IDE",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "group_name": {"type": "string", "description": "分组名称"},
+                            "target_ide": {"type": "string", "enum": ["qoder", "cursor"], "description": "目标 IDE"},
+                            "install_scope": {"type": "string", "enum": ["user", "project"], "description": "安装范围"},
+                            "install_path": {"type": "string", "description": "项目路径（项目级安装需要）"}
+                        },
+                        "required": ["group_name", "target_ide", "install_scope"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "uninstall",
+                    "description": "卸载已安装的分组",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "installation_id": {"type": "integer", "description": "安装记录 ID"}
+                        },
+                        "required": ["installation_id"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "list_installations",
+                    "description": "列出所有安装记录",
+                    "parameters": {"type": "object", "properties": {}}
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "compare_versions",
+                    "description": "对比已安装版本和本地版本",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "installation_id": {"type": "integer", "description": "安装记录 ID"}
+                        },
+                        "required": ["installation_id"]
+                    }
+                }
+            }
+        ]
+
+    def call_tool(self, name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
+        """Call a tool by name with arguments."""
+        tool_map = {
+            "import_from_git": self.import_from_git,
+            "import_from_local": self.import_from_local,
+            "list_packages": self.list_packages,
+            "create_group": self.create_group,
+            "list_groups": self.list_groups,
+            "add_to_group": self.add_to_group,
+            "install_group": self.install_group,
+            "uninstall": self.uninstall,
+            "list_installations": self.list_installations,
+            "compare_versions": self.compare_versions,
+        }
+        
+        if name not in tool_map:
+            return {"success": False, "message": f"未知工具: {name}"}
+        
+        return tool_map[name](**arguments)
+```
+
+- [ ] **Step 4: 创建 core.py**
+
+```python
+"""Agent core - handles conversation and tool calling."""
+import json
+from typing import List, Dict, Any, Optional
+
+from openai import OpenAI
+from sqlalchemy.orm import Session
+
+from .prompts import SYSTEM_PROMPT
+from .tools import AgentTools
+from ..models import Config
+
+
+class Agent:
+    """Main agent class that handles conversation."""
+
+    def __init__(self, db: Session):
+        self.db = db
+        self.tools = AgentTools(db)
+        self.client = None
+        self._init_client()
+
+    def _init_client(self):
+        """Initialize OpenAI client with configured API key."""
+        api_key_config = self.db.query(Config).filter(Config.key == "api_key").first()
+        api_base_config = self.db.query(Config).filter(Config.key == "api_base_url").first()
+        
+        api_key = api_key_config.value if api_key_config else None
+        api_base = api_base_config.value if api_base_config else None
+        
+        if api_key:
+            kwargs = {"api_key": api_key}
+            if api_base:
+                kwargs["base_url"] = api_base
+            self.client = OpenAI(**kwargs)
+
+    def chat(self, message: str, history: Optional[List[Dict]] = None) -> Dict[str, Any]:
+        """Process a chat message and return response."""
+        if not self.client:
+            return {
+                "response": "请先在设置页面配置 API Key。",
+                "tool_calls": None
+            }
+
+        # Build messages
+        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+        
+        if history:
+            messages.extend(history)
+        
+        messages.append({"role": "user", "content": message})
+
+        try:
+            # Call LLM with tools
+            response = self.client.chat.completions.create(
+                model="gpt-4o-mini",  # Can be configured
+                messages=messages,
+                tools=self.tools.get_tools_schema(),
+                tool_choice="auto"
+            )
+
+            assistant_message = response.choices[0].message
+            tool_calls_results = []
+
+            # Handle tool calls
+            if assistant_message.tool_calls:
+                for tool_call in assistant_message.tool_calls:
+                    function_name = tool_call.function.name
+                    arguments = json.loads(tool_call.function.arguments)
+                    
+                    # Execute tool
+                    result = self.tools.call_tool(function_name, arguments)
+                    tool_calls_results.append({
+                        "tool": function_name,
+                        "arguments": arguments,
+                        "result": result
+                    })
+
+                # If there were tool calls, make another call to get final response
+                messages.append({"role": "assistant", "content": None, "tool_calls": [
+                    {"id": tc.id, "type": "function", "function": {"name": tc.function.name, "arguments": tc.function.arguments}}
+                    for tc in assistant_message.tool_calls
+                ]})
+                
+                for i, tool_call in enumerate(assistant_message.tool_calls):
+                    messages.append({
+                        "role": "tool",
+                        "tool_call_id": tool_call.id,
+                        "content": json.dumps(tool_calls_results[i]["result"], ensure_ascii=False)
+                    })
+
+                # Get final response
+                final_response = self.client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=messages
+                )
+                final_text = final_response.choices[0].message.content
+            else:
+                final_text = assistant_message.content
+
+            return {
+                "response": final_text,
+                "tool_calls": tool_calls_results if tool_calls_results else None
+            }
+
+        except Exception as e:
+            return {
+                "response": f"抱歉，发生了错误: {str(e)}",
+                "tool_calls": None
+            }
+```
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add backend/app/agent/
+git commit -m "feat: add Agent core module with tools and prompts"
+```
+
+---
+
+### Task 18: 更新 Chat API 使用 Agent
+
+**Files:**
+- Modify: `backend/app/api/chat.py`
+
+- [ ] **Step 1: 更新 chat.py**
+
+```python
+"""Chat API with Agent."""
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from ..database import get_db
+from ..schemas import ChatMessage, ChatResponse
+from ..agent import Agent
+
+router = APIRouter()
+
+
+@router.post("/", response_model=ChatResponse)
+def chat(message: ChatMessage, db: Session = Depends(get_db)):
+    """Chat with Agent."""
+    agent = Agent(db)
+    result = agent.chat(message.message)
+    return ChatResponse(
+        response=result["response"],
+        tool_calls=result.get("tool_calls")
+    )
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add backend/app/api/chat.py
+git commit -m "feat: integrate Agent into chat API"
+```
+
+---
+
+## Phase 7: Cursor 安装器
+
+### Task 19: 创建 Cursor 安装器
+
+**Files:**
+- Create: `backend/app/installers/cursor.py`
+- Modify: `backend/app/installers/__init__.py`
+- Modify: `backend/app/services/install_service.py`
+
+- [ ] **Step 1: 创建 cursor.py**
+
+```python
+"""Cursor IDE installer."""
+import json
+import shutil
+from pathlib import Path
+from typing import List
+
+from .base import BaseInstaller
+
+
+class CursorInstaller(BaseInstaller):
+    """Installer for Cursor IDE."""
+
+    def get_install_path(self, scope: str, project_path: str = None) -> Path:
+        """Get Cursor installation path."""
+        if scope == "user":
+            return Path.home() / ".cursor"
+        elif scope == "project":
+            if not project_path:
+                raise ValueError("Project path required for project-level install")
+            return Path(project_path) / ".cursor"
+        else:
+            raise ValueError(f"Invalid scope: {scope}")
+
+    def install_package(self, package_path: Path, install_path: Path) -> List[str]:
+        """Install package to Cursor."""
+        installed_files = []
+
+        # Find source directories
+        # Cursor uses similar structure to Qoder, check for .cursor or .qoder
+        cursor_source = package_path / ".cursor"
+        qoder_source = package_path / ".qoder"
+        
+        if cursor_source.exists():
+            source_base = cursor_source
+        elif qoder_source.exists():
+            source_base = qoder_source
+        else:
+            source_base = package_path
+
+        # Install skills (Cursor calls them skills too)
+        skills_source = source_base / "skills"
+        if skills_source.exists():
+            skills_target = install_path / "skills"
+            skills_target.mkdir(parents=True, exist_ok=True)
+            
+            for skill_dir in skills_source.iterdir():
+                if skill_dir.is_dir():
+                    target = skills_target / skill_dir.name
+                    if target.exists():
+                        shutil.rmtree(target)
+                    shutil.copytree(skill_dir, target)
+                    installed_files.append(str(target))
+
+        # Install agents (Cursor may call them subagents)
+        agents_source = source_base / "agents"
+        if agents_source.exists():
+            agents_target = install_path / "agents"
+            agents_target.mkdir(parents=True, exist_ok=True)
+            
+            for agent_file in agents_source.glob("*.md"):
+                target = agents_target / agent_file.name
+                shutil.copy2(agent_file, target)
+                installed_files.append(str(target))
+
+        # Install hooks
+        hooks_source = source_base / "hooks"
+        if hooks_source.exists():
+            hooks_target = install_path / "hooks"
+            hooks_target.mkdir(parents=True, exist_ok=True)
+            
+            for hook_file in hooks_source.glob("*.sh"):
+                target = hooks_target / hook_file.name
+                shutil.copy2(hook_file, target)
+                target.chmod(target.stat().st_mode | 0o111)
+                installed_files.append(str(target))
+
+        # Install rules (Cursor uses rules directory)
+        rules_source = source_base / "rules"
+        if rules_source.exists():
+            rules_target = install_path / "rules"
+            rules_target.mkdir(parents=True, exist_ok=True)
+            
+            for rule_file in rules_source.glob("*.md"):
+                target = rules_target / rule_file.name
+                shutil.copy2(rule_file, target)
+                installed_files.append(str(target))
+
+        # Merge settings
+        self.merge_settings(install_path, source_base)
+
+        return installed_files
+
+    def uninstall_files(self, files: List[str]) -> bool:
+        """Remove installed files."""
+        for file_path in files:
+            path = Path(file_path)
+            if path.exists():
+                if path.is_dir():
+                    shutil.rmtree(path)
+                else:
+                    path.unlink()
+        return True
+
+    def merge_settings(self, install_path: Path, package_path: Path) -> bool:
+        """Merge settings.json with package settings."""
+        package_settings = package_path / "settings.json"
+        if not package_settings.exists():
+            return True
+
+        target_settings = install_path / "settings.json"
+        
+        existing = {}
+        if target_settings.exists():
+            with open(target_settings, "r") as f:
+                existing = json.load(f)
+
+        with open(package_settings, "r") as f:
+            package = json.load(f)
+
+        # Merge hooks
+        if "hooks" in package:
+            if "hooks" not in existing:
+                existing["hooks"] = {}
+            
+            for event, handlers in package["hooks"].items():
+                if event not in existing["hooks"]:
+                    existing["hooks"][event] = []
+                existing["hooks"][event].extend(handlers)
+
+        target_settings.parent.mkdir(parents=True, exist_ok=True)
+        with open(target_settings, "w") as f:
+            json.dump(existing, f, indent=2)
+
+        return True
+```
+
+- [ ] **Step 2: 更新 installers/__init__.py**
+
+```python
+"""IDE installers."""
+from .base import BaseInstaller
+from .qoder import QoderInstaller
+from .cursor import CursorInstaller
+```
+
+- [ ] **Step 3: 更新 install_service.py 注册 Cursor 安装器**
+
+将 `install_service.py` 中的：
+```python
+self.installers = {
+    "qoder": QoderInstaller(),
+}
+```
+
+改为：
+```python
+from ..installers import QoderInstaller, CursorInstaller
+
+# ...
+
+self.installers = {
+    "qoder": QoderInstaller(),
+    "cursor": CursorInstaller(),
+}
+```
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add backend/app/installers/
+git commit -m "feat: add Cursor IDE installer"
+```
+
+---
+
+### Task 20: 更新前端支持 Cursor
+
+**Files:**
+- Modify: `frontend/src/views/InstallationsView.vue`
+
+- [ ] **Step 1: 启用 Cursor 选项**
+
+将 InstallationsView.vue 中的：
+```vue
+<el-option label="Cursor" value="cursor" disabled />
+```
+
+改为：
+```vue
+<el-option label="Cursor" value="cursor" />
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add frontend/src/views/InstallationsView.vue
+git commit -m "feat: enable Cursor option in frontend"
+```
+
+---
+
 ## 执行摘要
 
 | Phase | 任务数 | 说明 |
@@ -2911,10 +3651,11 @@ git commit -m "chore: final cleanup and verification"
 | Phase 3 | 3 | 后端 API（REST 接口） |
 | Phase 4 | 2 | 前端界面（布局和视图页面） |
 | Phase 5 | 2 | 测试和收尾 |
+| Phase 6 | 2 | Agent 对话功能（核心模块 + Chat API 集成） |
+| Phase 7 | 2 | Cursor 安装器（后端 + 前端） |
 
-**总计：16 个任务**
+**总计：20 个任务**
 
 后续扩展（不在本计划内）：
-- Agent 对话功能完整实现
-- Cursor 安装器
 - 更多测试覆盖
+- 支持更多 AI IDE（Codex、OpenCode、Gemini CLI）

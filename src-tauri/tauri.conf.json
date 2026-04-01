@@ -1,0 +1,27 @@
+{
+  "build": {
+    "distDir": "../web/dist",
+    "devPath": "http://localhost:27842",
+    "beforeDevCommand": "cd ../web && npm run dev",
+    "beforeBuildCommand": "cd ../web && npm run build"
+  },
+  "package": {
+    "productName": "Easy Skills",
+    "version": "0.1.0"
+  },
+  "tauri": {
+    "bundle": {
+      "identifier": "com.easy-skills.app",
+      "targets": "all"
+    },
+    "windows": [
+      {
+        "title": "Easy Skills Hub",
+        "width": 900,
+        "height": 700,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ]
+  }
+}

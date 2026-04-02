@@ -5,12 +5,12 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+CREATE_DMG="$PROJECT_DIR/src-tauri/target/release/bundle/dmg/bundle_dmg.sh"
 
 APP_PATH="$PROJECT_DIR/src-tauri/target/release/bundle/macos/Easy Skills.app"
-DMG_PATH="$PROJECT_DIR/src-tauri/target/release/bundle/dmg"
-DMG_NAME="Easy Skills_0.1.0_aarch64.dmg"
-TEMP_DMG="/tmp/easy-skills-temp.dmg"
-FINAL_DMG="$DMG_PATH/$DMG_NAME"
+DMG_DIR="$PROJECT_DIR/src-tauri/target/release/bundle/dmg"
+FINAL_DMG="$DMG_DIR/Easy Skills_0.1.0_aarch64.dmg"
+TEMP_DIR="$PROJECT_DIR/tmp_dmg"
 
 # Check if app exists
 if [ ! -d "$APP_PATH" ]; then
@@ -18,21 +18,33 @@ if [ ! -d "$APP_PATH" ]; then
     exit 1
 fi
 
-# Remove old dmg if exists
-rm -f "$FINAL_DMG"
+# Check if create-dmg script exists
+if [ ! -f "$CREATE_DMG" ]; then
+    echo "Error: create-dmg script not found at $CREATE_DMG"
+    exit 1
+fi
 
-# Create temp directory for dmg content
-TEMP_DIR=$(mktemp -d)
+# Clean up old files
+rm -rf "$TEMP_DIR" "$FINAL_DMG"
+mkdir -p "$TEMP_DIR"
+
+# Copy app to temp dir
 cp -r "$APP_PATH" "$TEMP_DIR/"
 
-# Create new dmg
-hdiutil create -volname "Easy Skills" -srcfolder "$TEMP_DIR" -ov -format UDZO "$TEMP_DMG"
-
-# Move to final location
-mkdir -p "$DMG_PATH"
-mv "$TEMP_DMG" "$FINAL_DMG"
+# Use create-dmg with standard Mac installer style
+"$CREATE_DMG" \
+    --volname "Easy Skills" \
+    --volicon "$APP_PATH/Contents/Resources/Easy Skills.icns" \
+    --window-pos 200 120 \
+    --window-size 540 400 \
+    --icon-size 96 \
+    --icon "Easy Skills.app" 160 205 \
+    --app-drop-link 420 205 \
+    --hide-extension "Easy Skills.app" \
+    "$FINAL_DMG" \
+    "$TEMP_DIR"
 
 # Cleanup
 rm -rf "$TEMP_DIR"
 
-echo "Created dmg with frontend assets: $FINAL_DMG"
+echo "Created dmg with Mac installer style: $FINAL_DMG"

@@ -679,8 +679,8 @@ function App() {
                     <p className="text-purple-600">/easy-skills 查看 superpowers 的版本历史</p>
                     <p className="text-gray-500 mt-2"># Rollback</p>
                     <p className="text-purple-600">/easy-skills 回滚 superpowers 到某个版本</p>
-                    <p className="text-gray-500 mt-2"># Switch target</p>
-                    <p className="text-purple-600">/easy-skills 把目标 IDE 切换成 cursor</p>
+                    <p className="text-gray-500 mt-2"># Reinstall</p>
+                    <p className="text-purple-600">/easy-skills 重新安装这个 package</p>
                     <p className="text-gray-500 mt-2"># Check status</p>
                     <p className="text-orange-600">easy-skills status --ide qoder</p>
                   </div>

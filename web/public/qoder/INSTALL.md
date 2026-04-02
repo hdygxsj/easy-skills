@@ -18,7 +18,7 @@ chmod +x ~/Downloads/easy-skills
 mv ~/Downloads/easy-skills /usr/local/bin/easy-skills
 ```
 
-### Option C: Via Go
+### Option C: Via npm
 ```bash
 npm install -g easy-skills-cli
 ```

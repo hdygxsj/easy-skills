@@ -55,7 +55,9 @@ build-tauri:
 	cp -r web/dist src-tauri/assets
 	cd src-tauri && cargo tauri build
 	@echo "Copying frontend assets to app bundle..."
-	cp -r src-tauri/assets/dist/* "src-tauri/target/release/bundle/macos/Easy Skills.app/Contents/Resources/" 2>/dev/null || true
+	cp -r src-tauri/assets/* "src-tauri/target/release/bundle/macos/Easy Skills.app/Contents/Resources/"
+	@echo "Fixing dmg to include assets..."
+	@./scripts/fix-dmg.sh
 	@echo "Moving bundles to releases..."
 	mkdir -p releases
 	mv src-tauri/target/release/bundle/macos/*.app releases/ 2>/dev/null || true

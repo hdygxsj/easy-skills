@@ -666,13 +666,13 @@ function App() {
                   </p>
                   <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm space-y-2">
                     <p className="text-gray-500"># Check installed packages</p>
-                    <p className="text-purple-600">/easy-skills list installed packages</p>
+                    <p className="text-purple-600">/easy-skills 查看已安装的 packages</p>
                     <p className="text-gray-500 mt-2"># View package details</p>
-                    <p className="text-purple-600">/easy-skills show details for superpowers</p>
+                    <p className="text-purple-600">/easy-skills 帮我看看 superpowers 这个包有哪些 skills</p>
                     <p className="text-gray-500 mt-2"># Switch IDE target</p>
-                    <p className="text-purple-600">/easy-skills change target to cursor</p>
+                    <p className="text-purple-600">/easy-skills 把目标 IDE 切换成 cursor</p>
                     <p className="text-gray-500 mt-2"># Check installation status</p>
-                    <p className="text-purple-600">/easy-skills status --ide qoder</p>
+                    <p className="text-orange-600">easy-skills status --ide qoder</p>
                   </div>
                 </section>
 

@@ -307,7 +307,7 @@ function App() {
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
-            Skills
+            Components
           </button>
         </nav>
       </div>
@@ -431,7 +431,7 @@ function App() {
               <div className="bg-blue-50 px-4 py-3 border-b border-gray-200">
                 <h3 className="font-semibold text-blue-800 flex items-center gap-2">
                   <Target className="w-4 h-4" />
-                  Skills
+                  Components
                   <span className="text-sm text-blue-500 font-normal">(from packages)</span>
                 </h3>
               </div>

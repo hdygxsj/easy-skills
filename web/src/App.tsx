@@ -9,7 +9,8 @@ import {
   Loader2,
   Folder,
   FolderOpen,
-  Clock
+  Clock,
+  ChevronDown
 } from 'lucide-react'
 
 interface Package {
@@ -205,18 +206,21 @@ function App() {
             
             {/* Project Selector (only show when scope is project) */}
             {scope === 'project' && (
-              <select
-                value={selectedProject || ''}
-                onChange={(e) => setSelectedProject(e.target.value || null)}
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg bg-white"
-              >
-                <option value="">Select project...</option>
-                {projects.map((proj) => (
-                  <option key={proj.name} value={proj.name}>
-                    {proj.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={selectedProject || ''}
+                  onChange={(e) => setSelectedProject(e.target.value || null)}
+                  className="appearance-none pl-3 pr-8 py-1.5 text-sm font-medium rounded-lg border border-gray-200 bg-white cursor-pointer hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select project...</option>
+                  {projects.map((proj) => (
+                    <option key={proj.name} value={proj.name}>
+                      {proj.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
             )}
             
             {/* IDE Selector - Segmented Control */}

@@ -8,7 +8,8 @@ import {
   Check,
   Loader2,
   Folder,
-  FolderOpen
+  FolderOpen,
+  Clock
 } from 'lucide-react'
 
 interface Package {
@@ -20,6 +21,7 @@ interface Package {
   installed: boolean
   installPath: string
   scope: 'user' | 'project'
+  installedAt?: string
   components: Component[]
 }
 
@@ -30,6 +32,7 @@ interface Component {
   packageName?: string
   installed?: boolean
   installPath?: string
+  installedAt?: string
 }
 
 function App() {
@@ -55,11 +58,12 @@ function App() {
         installed: true,
         installPath: '~/.qoder/skills/superpowers',
         scope: 'user',
+        installedAt: '2024-01-15 10:30',
         components: [
-          { id: '1', name: 'brainstorming', type: 'skill', packageName: 'superpowers', installed: true, installPath: '~/.qoder/skills/superpowers/brainstorming' },
-          { id: '2', name: 'writing-plans', type: 'skill', packageName: 'superpowers', installed: true, installPath: '~/.qoder/skills/superpowers/writing-plans' },
-          { id: '3', name: 'test-driven-development', type: 'skill', packageName: 'superpowers', installed: true, installPath: '~/.qoder/skills/superpowers/test-driven-development' },
-          { id: '4', name: 'subagent-driven-dev', type: 'agent', packageName: 'superpowers', installed: true, installPath: '~/.qoder/skills/superpowers/subagent-driven-development' },
+          { id: '1', name: 'brainstorming', type: 'skill', packageName: 'superpowers', installed: true, installPath: '~/.qoder/skills/superpowers/brainstorming', installedAt: '2024-01-15 10:30' },
+          { id: '2', name: 'writing-plans', type: 'skill', packageName: 'superpowers', installed: true, installPath: '~/.qoder/skills/superpowers/writing-plans', installedAt: '2024-01-15 10:30' },
+          { id: '3', name: 'test-driven-development', type: 'skill', packageName: 'superpowers', installed: true, installPath: '~/.qoder/skills/superpowers/test-driven-development', installedAt: '2024-01-15 10:30' },
+          { id: '4', name: 'subagent-driven-dev', type: 'agent', packageName: 'superpowers', installed: true, installPath: '~/.qoder/skills/superpowers/subagent-driven-development', installedAt: '2024-01-15 10:30' },
         ]
       },
       {
@@ -70,9 +74,10 @@ function App() {
         installed: true,
         installPath: '.qoder/skills/open-spec',
         scope: 'project',
+        installedAt: '2024-02-20 14:15',
         components: [
-          { id: '5', name: 'api-design', type: 'skill', packageName: 'open-spec', installed: true, installPath: '.qoder/skills/open-spec/api-design' },
-          { id: '6', name: 'typescript-rules', type: 'rule', packageName: 'open-spec', installed: true, installPath: '.qoder/skills/open-spec/typescript-rules' },
+          { id: '5', name: 'api-design', type: 'skill', packageName: 'open-spec', installed: true, installPath: '.qoder/skills/open-spec/api-design', installedAt: '2024-02-20 14:15' },
+          { id: '6', name: 'typescript-rules', type: 'rule', packageName: 'open-spec', installed: true, installPath: '.qoder/skills/open-spec/typescript-rules', installedAt: '2024-02-20 14:15' },
         ]
       }
     ]
@@ -86,9 +91,10 @@ function App() {
         installed: true,
         installPath: '~/.cursorrules/cursor-tools',
         scope: 'user',
+        installedAt: '2024-03-01 09:00',
         components: [
-          { id: '7', name: 'cursor-skill', type: 'skill', packageName: 'cursor-tools', installed: true, installPath: '~/.cursorrules/cursor-tools/cursor-skill' },
-          { id: '8', name: 'cursor-agent', type: 'agent', packageName: 'cursor-tools', installed: true, installPath: '~/.cursorrules/cursor-tools/cursor-agent' },
+          { id: '7', name: 'cursor-skill', type: 'skill', packageName: 'cursor-tools', installed: true, installPath: '~/.cursorrules/cursor-tools/cursor-skill', installedAt: '2024-03-01 09:00' },
+          { id: '8', name: 'cursor-agent', type: 'agent', packageName: 'cursor-tools', installed: true, installPath: '~/.cursorrules/cursor-tools/cursor-agent', installedAt: '2024-03-01 09:00' },
         ]
       },
       {
@@ -99,6 +105,7 @@ function App() {
         installed: false,
         installPath: '',
         scope: 'user',
+        installedAt: undefined,
         components: [
           { id: '9', name: 'brainstorming', type: 'skill', packageName: 'superpowers', installed: false, installPath: '' },
           { id: '10', name: 'verification', type: 'skill', packageName: 'superpowers', installed: false, installPath: '' },
@@ -225,6 +232,13 @@ function App() {
                   <code className="text-gray-600 text-xs truncate">{pkg.installPath || 'N/A'}</code>
                 </div>
                 
+                {pkg.installed && pkg.installedAt && (
+                  <div className="mt-2 flex items-center gap-1 text-xs text-gray-400">
+                    <Clock className="w-3 h-3" />
+                    <span>{pkg.installedAt}</span>
+                  </div>
+                )}
+                
                 <p className="text-xs text-gray-400 mt-2">{pkg.components.length} components</p>
               </div>
             ))}
@@ -263,8 +277,14 @@ function App() {
                           <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
                             <code className="truncate">{comp.installPath || 'N/A'}</code>
                           </div>
-                          <div className="mt-1 text-xs text-gray-400">
-                            from {comp.packageName}
+                          <div className="mt-1 flex items-center gap-2">
+                            <span className="text-xs text-gray-400">from {comp.packageName}</span>
+                            {comp.installed && comp.installedAt && (
+                              <span className="flex items-center gap-1 text-xs text-gray-400">
+                                <Clock className="w-3 h-3" />
+                                {comp.installedAt}
+                              </span>
+                            )}
                           </div>
                         </div>
                       ))
@@ -305,8 +325,14 @@ function App() {
                           <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
                             <code className="truncate">{comp.installPath || 'N/A'}</code>
                           </div>
-                          <div className="mt-1 text-xs text-gray-400">
-                            from {comp.packageName}
+                          <div className="mt-1 flex items-center gap-2">
+                            <span className="text-xs text-gray-400">from {comp.packageName}</span>
+                            {comp.installed && comp.installedAt && (
+                              <span className="flex items-center gap-1 text-xs text-gray-400">
+                                <Clock className="w-3 h-3" />
+                                {comp.installedAt}
+                              </span>
+                            )}
                           </div>
                         </div>
                       ))
@@ -347,8 +373,14 @@ function App() {
                           <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
                             <code className="truncate">{comp.installPath || 'N/A'}</code>
                           </div>
-                          <div className="mt-1 text-xs text-gray-400">
-                            from {comp.packageName}
+                          <div className="mt-1 flex items-center gap-2">
+                            <span className="text-xs text-gray-400">from {comp.packageName}</span>
+                            {comp.installed && comp.installedAt && (
+                              <span className="flex items-center gap-1 text-xs text-gray-400">
+                                <Clock className="w-3 h-3" />
+                                {comp.installedAt}
+                              </span>
+                            )}
                           </div>
                         </div>
                       ))
@@ -389,8 +421,14 @@ function App() {
                           <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
                             <code className="truncate">{comp.installPath || 'N/A'}</code>
                           </div>
-                          <div className="mt-1 text-xs text-gray-400">
-                            from {comp.packageName}
+                          <div className="mt-1 flex items-center gap-2">
+                            <span className="text-xs text-gray-400">from {comp.packageName}</span>
+                            {comp.installed && comp.installedAt && (
+                              <span className="flex items-center gap-1 text-xs text-gray-400">
+                                <Clock className="w-3 h-3" />
+                                {comp.installedAt}
+                              </span>
+                            )}
                           </div>
                         </div>
                       ))

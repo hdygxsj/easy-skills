@@ -156,7 +156,13 @@ function App() {
     if (scope === 'user') {
       allPackages = allPackages.filter(p => p.scope === 'user')
     } else if (scope === 'project' && selectedProject) {
-      allPackages = allPackages.filter(p => p.scope === 'project' && p.projectName === selectedProject)
+      // Project 视图：同时显示 User scope（继承）和该 Project scope 的 packages
+      allPackages = allPackages.filter(p => 
+        p.scope === 'user' || (p.scope === 'project' && p.projectName === selectedProject)
+      )
+    } else if (scope === 'project' && !selectedProject) {
+      // 选择了 project 但没选具体项目，只显示 user scope
+      allPackages = allPackages.filter(p => p.scope === 'user')
     }
     
     setPackages(allPackages)
@@ -296,48 +302,109 @@ function App() {
             <span>Loading...</span>
           </div>
         ) : view === 'packages' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {packages.map((pkg) => (
-              <div key={pkg.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-semibold text-lg">{pkg.name}</h3>
-                    <p className="text-sm text-gray-500 mt-0.5">v{pkg.version}</p>
-                  </div>
-                  <span className={`px-2 py-1 text-xs rounded flex items-center gap-1 ${
-                    pkg.installed 
-                      ? 'bg-green-100 text-green-700' 
-                      : 'bg-gray-200 text-gray-500'
-                  }`}>
-                    <Check className="w-3 h-3" />
-                    {pkg.installed ? 'Installed' : 'Not Installed'}
-                  </span>
+          <div className="space-y-6">
+            {/* User Scope Packages */}
+            {scope === 'project' && (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-500 mb-3 flex items-center gap-2">
+                  <Folder className="w-4 h-4" />
+                  User Scope (Inherited)
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {packages.filter(p => p.scope === 'user').map((pkg) => (
+                    <div key={pkg.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200 opacity-80">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="font-semibold text-lg">{pkg.name}</h3>
+                          <p className="text-sm text-gray-500 mt-0.5">v{pkg.version}</p>
+                        </div>
+                        <span className={`px-2 py-1 text-xs rounded flex items-center gap-1 ${
+                          pkg.installed 
+                            ? 'bg-green-100 text-green-700' 
+                            : 'bg-gray-200 text-gray-500'
+                        }`}>
+                          <Check className="w-3 h-3" />
+                          {pkg.installed ? 'Installed' : 'Not Installed'}
+                        </span>
+                      </div>
+                      <div className="mt-3 flex items-center gap-2 text-sm">
+                        <Folder className="w-4 h-4 text-gray-400" />
+                        <code className="text-gray-600 text-xs truncate">{pkg.installPath || 'N/A'}</code>
+                      </div>
+                      {pkg.installed && pkg.installedAt && (
+                        <div className="mt-2 flex items-center gap-1 text-xs text-gray-400">
+                          <Clock className="w-3 h-3" />
+                          <span>{pkg.installedAt}</span>
+                        </div>
+                      )}
+                      <p className="text-xs text-gray-400 mt-2">{pkg.components.length} components</p>
+                    </div>
+                  ))}
                 </div>
-                
-                <div className="mt-3 flex items-center gap-2 text-sm">
-                  {pkg.scope === 'user' ? (
-                    <Folder className="w-4 h-4 text-gray-400" />
-                  ) : (
-                    <FolderOpen className="w-4 h-4 text-gray-400" />
-                  )}
-                  <code className="text-gray-600 text-xs truncate">{pkg.installPath || 'N/A'}</code>
-                  {pkg.scope === 'project' && pkg.projectName && (
-                    <span className="px-1.5 py-0.5 bg-purple-100 text-purple-700 text-xs rounded">
-                      {pkg.projectName}
-                    </span>
-                  )}
-                </div>
-                
-                {pkg.installed && pkg.installedAt && (
-                  <div className="mt-2 flex items-center gap-1 text-xs text-gray-400">
-                    <Clock className="w-3 h-3" />
-                    <span>{pkg.installedAt}</span>
-                  </div>
-                )}
-                
-                <p className="text-xs text-gray-400 mt-2">{pkg.components.length} components</p>
               </div>
-            ))}
+            )}
+            
+            {/* Project Scope Packages */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-500 mb-3 flex items-center gap-2">
+                {scope === 'project' ? (
+                  <>
+                    <FolderOpen className="w-4 h-4" />
+                    Project Scope ({selectedProject})
+                  </>
+                ) : (
+                  <>
+                    <Folder className="w-4 h-4" />
+                    User Scope
+                  </>
+                )}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {packages.filter(p => scope === 'user' || p.scope === 'project').map((pkg) => (
+                  <div key={pkg.id} className={`bg-gray-50 rounded-lg p-4 border ${
+                    pkg.scope === 'project' ? 'border-purple-200' : 'border-gray-200'
+                  }`}>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-semibold text-lg">{pkg.name}</h3>
+                        <p className="text-sm text-gray-500 mt-0.5">v{pkg.version}</p>
+                      </div>
+                      <span className={`px-2 py-1 text-xs rounded flex items-center gap-1 ${
+                        pkg.installed 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-gray-200 text-gray-500'
+                      }`}>
+                        <Check className="w-3 h-3" />
+                        {pkg.installed ? 'Installed' : 'Not Installed'}
+                      </span>
+                    </div>
+                    
+                    <div className="mt-3 flex items-center gap-2 text-sm">
+                      {pkg.scope === 'user' ? (
+                        <Folder className="w-4 h-4 text-gray-400" />
+                      ) : (
+                        <FolderOpen className="w-4 h-4 text-purple-400" />
+                      )}
+                      <code className="text-gray-600 text-xs truncate">{pkg.installPath || 'N/A'}</code>
+                      {pkg.scope === 'project' && pkg.projectName && (
+                        <span className="px-1.5 py-0.5 bg-purple-100 text-purple-700 text-xs rounded">
+                          {pkg.projectName}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {pkg.installed && pkg.installedAt && (
+                      <div className="mt-2 flex items-center gap-1 text-xs text-gray-400">
+                        <Clock className="w-3 h-3" />
+                        <span>{pkg.installedAt}</span>
+                      </div>
+                    )}
+                    
+                    <p className="text-xs text-gray-400 mt-2">{pkg.components.length} components</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         ) : (
           <div className="space-y-6">

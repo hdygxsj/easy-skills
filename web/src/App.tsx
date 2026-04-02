@@ -640,33 +640,33 @@ function App() {
                 <section>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <PackageIcon className="w-5 h-5 text-blue-500" />
-                    Install Skills
+                    Install
                   </h3>
                   <p className="text-gray-600 mb-3">
-                    Ask AI Agent to install skills from Easy Skills Hub:
+                    Tell AI Agent to install skills:
                   </p>
                   <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm space-y-1">
-                    <p className="text-gray-500"># Install a skill to Qoder</p>
-                    <p className="text-purple-600">Fetch and follow instructions from https://raw.githubusercontent.com/hdygxsj/superpowers/refs/heads/main/.qoder/INSTALL.md</p>
+                    <p className="text-gray-500"># Install a skill package</p>
+                    <p className="text-blue-600">/easy-skills install https://raw.githubusercontent.com/hdygxsj/superpowers/refs/heads/main/.qoder/INSTALL.md</p>
                   </div>
                   <p className="text-gray-500 text-sm mt-2">
                     This will install the skill to your IDE and register it in the Skill Hub.
                   </p>
                 </section>
 
-                {/* Skill Types */}
+                {/* Skill */}
                 <section>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <Target className="w-5 h-5 text-green-500" />
                     Skill
                   </h3>
                   <p className="text-gray-600 mb-3">
-                    Skills provide specialized capabilities. Use them by mentioning their name:
+                    Use skills by mentioning their name:
                   </p>
-                  <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm">
+                  <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm space-y-1">
                     <p className="text-gray-500"># Activate a skill</p>
                     <p className="text-green-600">/brainstorming</p>
-                    <p className="text-gray-500 mt-2"># Or let AI Agent know what you need</p>
+                    <p className="text-gray-500"># Or describe what you need</p>
                     <p className="text-green-600">"I need help with project planning"</p>
                   </div>
                 </section>
@@ -678,10 +678,10 @@ function App() {
                     Agent
                   </h3>
                   <p className="text-gray-600 mb-3">
-                    Agents are specialized AI subagents for specific tasks:
+                    Agents are specialized AI subagents:
                   </p>
-                  <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm">
-                    <p className="text-gray-500"># AI Agent will automatically use agents</p>
+                  <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm space-y-1">
+                    <p className="text-gray-500"># AI Agent uses agents automatically</p>
                     <p className="text-purple-600">"Review this code for security issues"</p>
                   </div>
                 </section>
@@ -693,12 +693,12 @@ function App() {
                     Hook
                   </h3>
                   <p className="text-gray-600 mb-3">
-                    Hooks automatically run at specific points (e.g., before commit):
+                    Hooks run automatically at specific points:
                   </p>
-                  <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm">
-                    <p className="text-gray-500"># Hooks run automatically</p>
-                    <p className="text-orange-600">git commit -m "fix: resolve issue"</p>
-                    <p className="text-gray-500 mt-1">→ pre-commit hook runs automatically</p>
+                  <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm space-y-1">
+                    <p className="text-gray-500"># Hooks trigger automatically</p>
+                    <p className="text-orange-600">git commit -m "fix: issue"</p>
+                    <p className="text-gray-400">→ pre-commit hook runs</p>
                   </div>
                 </section>
 
@@ -709,12 +709,12 @@ function App() {
                     Rule
                   </h3>
                   <p className="text-gray-600 mb-3">
-                    Rules define coding standards and best practices:
+                    Rules define coding standards:
                   </p>
-                  <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm">
-                    <p className="text-gray-500"># Rules are applied automatically</p>
+                  <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm space-y-1">
+                    <p className="text-gray-500"># Rules apply automatically</p>
                     <p className="text-red-600">"Write a React component"</p>
-                    <p className="text-gray-500 mt-1">→ AI follows TypeScript rules automatically</p>
+                    <p className="text-gray-400">→ AI follows TypeScript rules</p>
                   </div>
                 </section>
 

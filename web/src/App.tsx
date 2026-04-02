@@ -49,7 +49,7 @@ function App() {
   const [scope, setScope] = useState<'user' | 'project'>('user')
   const [selectedProject, setSelectedProject] = useState<string | null>(null)
   const [projects, setProjects] = useState<Project[]>([])
-  const [view, setView] = useState<'packages' | 'components'>('packages')
+  const [view, setView] = useState<'packages' | 'skills'>('packages')
   const [packages, setPackages] = useState<Package[]>([])
   const [loading, setLoading] = useState(true)
   const [showHelp, setShowHelp] = useState(false)
@@ -300,14 +300,14 @@ function App() {
             Packages
           </button>
           <button
-            onClick={() => setView('components')}
+            onClick={() => setView('skills')}
             className={`py-3 px-1 border-b-2 font-medium ${
-              view === 'components'
+              view === 'skills'
                 ? 'border-primary text-primary'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
-            Components
+            Skills
           </button>
         </nav>
       </div>
@@ -636,82 +636,49 @@ function App() {
             </div>
             <div className="p-6 overflow-y-auto max-h-[calc(80vh-72px)]">
               <div className="space-y-6">
-                {/* Register */}
+                {/* Install */}
                 <section>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <PackageIcon className="w-5 h-5 text-blue-500" />
-                    Register
+                    Install Skills
                   </h3>
                   <p className="text-gray-600 mb-3">
-                    Register a skill package to Hub:
+                    Tell AI Agent to install skills:
                   </p>
                   <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm space-y-1">
-                    <p className="text-gray-500"># Register from URL</p>
-                    <p className="text-blue-600">easy-skills register --name superpowers --target qoder --source https://github.com/...</p>
+                    <p className="text-gray-500"># Install to Qoder</p>
+                    <p className="text-blue-600">/easy-skills Fetch and follow instructions from</p>
+                    <p className="text-blue-600 pl-4">https://raw.githubusercontent.com/xxx/easy-skills/main/.qoder/INSTALL.md</p>
                   </div>
+                  <p className="text-gray-500 text-sm mt-2">
+                    This will install the skill to your IDE and register it in the Skill Hub.
+                  </p>
                 </section>
 
-                {/* List */}
+                {/* View Packages */}
                 <section>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <Target className="w-5 h-5 text-green-500" />
-                    List
+                    View Packages
                   </h3>
                   <p className="text-gray-600 mb-3">
-                    List packages in Hub:
+                    Browse installed packages and their components in this GUI.
                   </p>
-                  <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm space-y-1">
-                    <p className="text-gray-500"># List all packages</p>
-                    <p className="text-green-600">easy-skills list</p>
-                    <p className="text-gray-500"># List by IDE</p>
-                    <p className="text-green-600">easy-skills list --target qoder</p>
-                  </div>
                 </section>
 
-                {/* Status */}
+                {/* Web GUI */}
                 <section>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <Bot className="w-5 h-5 text-purple-500" />
-                    Status
+                    Start GUI
                   </h3>
                   <p className="text-gray-600 mb-3">
-                    Check installation status:
-                  </p>
-                  <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm space-y-1">
-                    <p className="text-gray-500"># Check IDE status</p>
-                    <p className="text-purple-600">easy-skills status --ide qoder</p>
-                  </div>
-                </section>
-
-                {/* Serve */}
-                <section>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <Anchor className="w-5 h-5 text-orange-500" />
-                    Web GUI
-                  </h3>
-                  <p className="text-gray-600 mb-3">
-                    Start the web interface:
+                    Start the web interface via CLI:
                   </p>
                   <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm space-y-1">
                     <p className="text-gray-500"># Start GUI server</p>
-                    <p className="text-orange-600">easy-skills serve</p>
+                    <p className="text-purple-600">easy-skills serve</p>
                     <p className="text-gray-500"># Open http://localhost:27842</p>
-                  </div>
-                </section>
-
-                {/* Hook */}
-                <section>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <Ruler className="w-5 h-5 text-red-500" />
-                    Hook
-                  </h3>
-                  <p className="text-gray-600 mb-3">
-                    Hooks run automatically at specific points:
-                  </p>
-                  <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm space-y-1">
-                    <p className="text-gray-500"># Hooks are installed with packages</p>
-                    <p className="text-red-600">git commit -m "fix: issue"</p>
-                    <p className="text-gray-400">→ pre-commit hook runs automatically</p>
                   </div>
                 </section>
 

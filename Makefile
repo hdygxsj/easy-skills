@@ -9,6 +9,8 @@ build:
 	cd web && npm install && npm run build
 	@echo "Copying web dist to CLI..."
 	cp -r web/dist internal/cli/dist
+	@echo "Copying skills to dist..."
+	cp -r skills internal/cli/dist/
 	@echo "Building CLI..."
 	go build -o easy-skills ./cmd/easy-skills
 	@echo "Done! Binary: ./easy-skills"

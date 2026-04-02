@@ -289,14 +289,14 @@ function App() {
             <span className="font-medium text-blue-700">Qoder:</span>
             <div className="mt-1 p-2 bg-blue-100 rounded font-mono text-xs text-blue-800">
               Fetch and follow instructions from<br/>
-              https://raw.githubusercontent.com/hdygxsj/easy-skills/master/web/public/qoder/INSTALL.md
+              https://raw.githubusercontent.com/hdygxsj/easy-skills/master/skills/qoder/INSTALL.md
             </div>
           </div>
           <div>
             <span className="font-medium text-blue-700">Cursor:</span>
             <div className="mt-1 p-2 bg-blue-100 rounded font-mono text-xs text-blue-800">
               Fetch and follow instructions from<br/>
-              https://raw.githubusercontent.com/hdygxsj/easy-skills/master/web/public/cursor/INSTALL.md
+              https://raw.githubusercontent.com/hdygxsj/easy-skills/master/skills/cursor/INSTALL.md
             </div>
           </div>
         </div>

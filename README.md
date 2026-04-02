@@ -2,7 +2,23 @@
 
 **让 AI Agent 自动管理你的 IDE Skills。**
 
-Easy Skills 是一个 AI IDE 的 Local Skill Hub，支持 Qoder 和 Cursor。通过自然语言，你的 AI Agent 可以自动安装、升级和管理各种 Skills，无需手动操作。
+## 痛点
+
+在使用 AI IDE（如 Cursor、Qoder）时，你是否遇到过这些困扰？
+
+- **手动安装繁琐**：每次换电脑或重装系统，都要重新查找、下载、配置各种 Skills
+- **版本管理混乱**：不知道已安装的 Skills 是什么版本，升级后出问题也不知道如何回滚
+- **多 IDE 不同步**：在 Cursor 和 Qoder 之间切换时，Skills 无法复用
+- **分享困难**：想让团队成员用上你的 Skill 包，需要手动复制粘贴一堆文件
+
+## 解决方案
+
+Easy Skills 是一个 AI IDE 的 Local Skill Hub，让你的 AI Agent 自动搞定一切：
+
+- **一句话安装**：告诉 AI Agent "帮我安装 xxx skill"，剩下的它来完成
+- **版本可控**：支持版本管理和回滚，随时可以回到之前的稳定版本
+- **多 IDE 共用**：Qoder 和 Cursor 可以安装同一套 Skills
+- **包管理理念**：像 npm 一样管理 Skills，支持从 GitHub 注册和分发
 
 ## 功能特性
 
@@ -117,12 +133,12 @@ npm run dev
 
 **对于 Qoder：**
 ```
-Fetch and follow instructions from https://raw.githubusercontent.com/hdygxsj/easy-skills/master/web/public/qoder/INSTALL.md
+Fetch and follow instructions from https://raw.githubusercontent.com/hdygxsj/easy-skills/master/skills/qoder/INSTALL.md
 ```
 
 **对于 Cursor：**
 ```
-Fetch and follow instructions from https://raw.githubusercontent.com/hdygxsj/easy-skills/master/web/public/cursor/INSTALL.md
+Fetch and follow instructions from https://raw.githubusercontent.com/hdygxsj/easy-skills/master/skills/cursor/INSTALL.md
 ```
 
 AI Agent 会自动完成：

@@ -158,7 +158,7 @@ function App() {
             <Loader2 className="w-8 h-8 animate-spin" />
             <span>Loading...</span>
           </div>
-        ) : view === 'components' ? (
+        ) : view === 'packages' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {packages.map((pkg) => (
               <div key={pkg.name} className="bg-gray-50 rounded-lg p-4 border border-gray-200">

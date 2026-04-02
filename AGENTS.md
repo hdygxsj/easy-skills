@@ -65,52 +65,121 @@ On error:
 
 ## Building & Releasing
 
-### Release Targets
+### Prerequisites
 
-**Only publish these to GitHub Releases:**
-1. **macOS ARM64 CLI** - `easy-skills-cli-macos-aarch64`
-2. **macOS ARM64 App** - `Easy Skills_X.Y.Z_aarch64.dmg`
-3. **npm package** - CLI via `npm publish`
+1. **npm Token** - 需要有 npm Granular Access Token 或开启 2FA bypass
+2. **GitHub Token** - 需要有 repo 权限的 GitHub Personal Access Token
+3. **Apple Developer Certificate** (可选) - 用于签名 Mac App，无证书时 App 会报"已损坏"
 
-> Note: Users on other platforms can install via `npm install -g easy-skills-cli`
+### Version Management
 
-### Build Steps
+**版本号规则：** CLI 和 npm 使用相同版本号（如 0.1.4）
 
 ```bash
-# 1. Build cross-platform binaries (for npm install.js to download)
-make build-cross
-
-# 2. Upload to GitHub Releases
-# - Go to https://github.com/hdygxsj/easy-skills/releases/new
-# - Create tag vX.Y.Z
-# - Upload:
-#   - easy-skills-cli-macos-aarch64 (CLI binary)
-#   - Easy Skills_X.Y.Z_aarch64.dmg (Mac App)
-
-# 3. Publish CLI to npm
-cd npm
-npm publish --access public
+# 更新 npm/package.json 版本
+vim npm/package.json  # 修改 version 字段
 ```
 
-### GitHub Release Assets
+### Complete Release Flow
 
-Upload these:
-- `easy-skills-cli-macos-aarch64` (macOS ARM64 CLI binary)
-- `Easy Skills_X.Y.Z_aarch64.dmg` (macOS ARM64 Mac App installer)
+```bash
+# ========== Step 1: 构建 ==========
 
-### npm Package
+# 构建前端（必须）
+cd web && npm install && npm run build && cd ..
+
+# 构建 CLI 跨平台二进制
+make build-cross
+
+# 构建 Mac App（需要 Rust 环境）
+make build-tauri
+
+# 构建产物位置：
+# - CLI: releases/bin/easy-skills-macos-aarch64
+# - App: releases/Easy Skills_X.Y.Z_aarch64.dmg
+```
+
+```bash
+# ========== Step 2: GitHub Release ==========
+
+# 方案 A: 网页操作
+# 1. 访问 https://github.com/hdygxsj/easy-skills/releases/new
+# 2. 点击 "Choose a tag" 输入 v0.1.4
+# 3. 上传两个文件：
+#    - releases/bin/easy-skills-macos-aarch64（命名为 easy-skills-cli-macos-aarch64）
+#    - releases/Easy Skills_0.1.0_aarch64.dmg
+# 4. 点击 "Publish release"
+
+# 方案 B: API 上传（需要 GitHub Token）
+RELEASE_ID="your_release_id"  # 从 release URL 获取
+GH_TOKEN="ghp_xxx"
+
+# 上传 CLI
+curl -X POST \
+  -H "Authorization: Bearer $GH_TOKEN" \
+  -H "Content-Type: application/octet-stream" \
+  "https://uploads.github.com/repos/hdygxsj/easy-skills/releases/$RELEASE_ID/assets?name=easy-skills-cli-macos-aarch64" \
+  --data-binary @releases/bin/easy-skills-macos-aarch64
+
+# 上传 dmg
+curl -X POST \
+  -H "Authorization: Bearer $GH_TOKEN" \
+  -H "Content-Type: application/x-apple-diskimage" \
+  "https://uploads.github.com/repos/hdygxsj/easy-skills/releases/$RELEASE_ID/assets?name=Easy%20Skills_0.1.0_aarch64.dmg" \
+  --data-binary @releases/Easy\ Skills_0.1.0_aarch64.dmg
+```
+
+```bash
+# ========== Step 3: npm 发布 ==========
+
+# 配置 npm token
+npm config set //registry.npmjs.org/:_authToken=npm_xxx
+
+# 发布（注意：每次发布必须升级版本号）
+cd npm
+npm publish
+
+# 验证
+npm view easy-skills-cli version  # 应显示最新版本
+npm install -g easy-skills-cli    # 测试安装
+```
+
+### npm Package Structure
 
 The `npm/` directory contains:
-- `package.json` - npm package config
-- `scripts/install.js` - downloads platform-specific binary from GitHub Releases
-- `bin/easy-skills` - Node wrapper that forwards to the downloaded binary
+- `package.json` - npm 包配置，name 为 `easy-skills-cli`
+- `scripts/install.js` - postinstall 脚本，从 GitHub Releases 下载对应平台的 CLI 二进制
+- `bin/easy-skills` - Node wrapper，转发命令到实际二进制
+
+### Mac App 签名说明
+
+**无签名问题：** 如果 Mac App 没有 Apple 签名，macOS 会报"App 已损坏"。
+
+**解决方案：**
+
+1. **临时方案 - xattr 绕过：**
+   ```bash
+   # 解压 dmg 后
+   xattr -cr "/Applications/Easy Skills.app"
+   open "/Applications/Easy Skills.app"
+   ```
+
+2. **正式方案 - 添加签名：**
+   - 加入 Apple Developer Program（99美元/年）
+   - 在 Xcode 中创建签名证书
+   - 在 `src-tauri/tauri.conf.json` 中配置：
+     ```json
+     "macOS": {
+       "signingIdentity": "Developer ID Application: Your Name (TEAMID)"
+     }
+     ```
 
 ### Historical Artifacts (for reference only)
 
 The `releases/` directory may contain:
-- `Easy Skills.app` - macOS App bundle (optional, users can use dmg instead)
-- `Easy Skills.dmg` - macOS installer (optional)
-- `easy-skills-source.tar.gz` - source code archive (optional)
+- `easy-skills-*-*` - 跨平台 CLI 二进制
+- `Easy Skills*.dmg` - macOS 安装器
+- `Easy Skills.app` - macOS App bundle
 
 ### Building Individual Components
 
@@ -118,5 +187,13 @@ The `releases/` directory may contain:
 make build          # Build CLI only
 make build-tauri    # Build Mac App only (includes dmg creation)
 make build-cross    # Build all cross-platform CLI binaries
-make source-tar     # Source archive only
+make source-tar    # Source archive only
 ```
+
+### Troubleshooting
+
+**npm publish E403:** 需要配置正确的 npm token，或在 npm 网站开启 2FA bypass
+
+**App 显示已损坏:** 无签名问题，使用 `xattr -cr` 绕过或购买 Apple 开发者证书
+
+**CLI 下载失败 404:** 检查 GitHub Release 是否存在对应版本号的 tag 和 asset

@@ -1,0 +1,115 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            target: macos-aarch64
+            artifact: easy-skills-macos-aarch64
+          - os: macos-latest
+            target: macos-x86_64
+            artifact: easy-skills-macos-x86_64
+          - os: ubuntu-latest
+            target: linux-x86_64
+            artifact: easy-skills-linux-x86_64
+          - os: ubuntu-latest
+            target: linux-aarch64
+            artifact: easy-skills-linux-aarch64
+          - os: windows-latest
+            target: windows-x86_64
+            artifact: easy-skills-windows-x86_64.exe
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get version
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Build web
+        run: |
+          cd web
+          npm install
+          npm run build
+          cd ..
+
+      - name: Build CLI
+        env:
+          GOOS: ${{ matrix.targetos }}
+          GOARCH: ${{ matrix.targetarch }}
+        run: |
+          if [[ "${{ matrix.target }}" == macos-* ]]; then
+            GOOS=darwin
+          elif [[ "${{ matrix.target }}" == linux-* ]]; then
+            GOOS=linux
+          else
+            GOOS=windows
+          fi
+          
+          if [[ "${{ matrix.target }}" == *x86_64 ]]; then
+            GOARCH=amd64
+          else
+            GOARCH=arm64
+          fi
+          
+          GOOS=$GOOS GOARCH=$GOARCH go build -ldflags="-s -w" -o releases/bin/${{ matrix.artifact }} ./cmd/easy-skills
+        shell: bash
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: releases/bin/${{ matrix.artifact }}
+
+  create-release:
+    needs: release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Get version
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: false
+          prerelease: false
+          version: ${{ steps.version.outputs.VERSION }}
+          generate_release_notes: true
+          files: |
+            artifacts/easy-skills-macos-aarch64
+            artifacts/easy-skills-macos-x86_64
+            artifacts/easy-skills-linux-x86_64
+            artifacts/easy-skills-linux-aarch64
+            artifacts/easy-skills-windows-x86_64.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

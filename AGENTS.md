@@ -81,6 +81,19 @@ VERSION=$(node -p "require('./npm/package.json').version")
 echo "Release version: $VERSION"
 ```
 
+**版本号升级规范（SemVer）：**
+
+| 改动类型 | 版本号升级 | 示例 |
+|---------|-----------|------|
+| 小型改动（bug修复、小优化） | 第三位 +1 | 0.1.3 → 0.1.4 |
+| 功能改动（新功能、较大改动） | 第二位 +1 | 0.1.4 → 0.2.0 |
+| 重大改动（架构升级、全面重构） | 第一位 +1 | 0.2.0 → 1.0.0 |
+
+**版本号示例：**
+- `0.1.4` → `0.1.5`：修复端口冲突检测 bug
+- `0.1.5` → `0.2.0`：新增项目目录安装功能
+- `0.2.3` → `1.0.0`：完全重构数据库层、支持多 IDE
+
 ### Complete Release Flow
 
 ```bash
@@ -206,3 +219,28 @@ make source-tar    # Source archive only
 **App 显示已损坏:** 无签名问题，使用 `xattr -cr` 绕过或购买 Apple 开发者证书
 
 **CLI 下载失败 404:** 检查 GitHub Release 是否存在对应版本号的 tag 和 asset
+
+### Automated Release (GitHub Actions)
+
+**自动发布流程：** 只需推送一个 tag，CI 会自动构建并创建 Release。
+
+```bash
+# 1. 更新版本号（npm/package.json 和 tauri.conf.json）
+vim npm/package.json          # 修改 version 字段
+vim src-tauri/tauri.conf.json # 修改 version 字段
+
+# 2. 提交更改并创建 tag
+git add .
+git commit -m "Release v0.1.4"
+git tag v0.1.4
+git push origin main --tags
+
+# 3. GitHub Actions 自动完成：
+#    - 构建前端 (web/)
+#    - 构建跨平台 CLI (macOS x64/ARM64, Linux x64/ARM64, Windows)
+#    - 创建 GitHub Release 并上传产物
+```
+
+**工作流文件：** `.github/workflows/release.yml`
+
+**注意：** Mac App (.dmg) 需要 macOS runner 和 Xcode，当前 CI 暂未包含。

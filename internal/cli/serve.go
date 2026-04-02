@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -32,6 +33,13 @@ func runServe(cmd *cobra.Command, args []string) {
 		return
 	}
 
+	// Check if port is available
+	addr := fmt.Sprintf(":%s", servePort)
+	if !isPortAvailable(addr) {
+		Failf("Port %s is already in use. Please stop the existing process or use a different port.", servePort)
+		os.Exit(1)
+	}
+
 	// Production mode - use embedded web UI
 	http.Handle("/", ServeFileServer())
 
@@ -39,13 +47,22 @@ func runServe(cmd *cobra.Command, args []string) {
 	http.HandleFunc("/api/packages", handlePackages)
 	http.HandleFunc("/api/projects", handleProjects)
 
-	addr := fmt.Sprintf(":%s", servePort)
 	fmt.Printf("Easy Skills Hub running at http://localhost:%s\n", servePort)
 	fmt.Printf("Press Ctrl+C to stop\n")
 
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		Failf("Server error: %v", err)
 	}
+}
+
+// isPortAvailable checks if the given address (e.g., ":27842") is available
+func isPortAvailable(addr string) bool {
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		return false
+	}
+	listener.Close()
+	return true
 }
 
 func runNpmDev() {

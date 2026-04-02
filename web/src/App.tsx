@@ -21,6 +21,7 @@ interface Package {
   installed: boolean
   installPath: string
   scope: 'user' | 'project'
+  projectName?: string // 项目目录名，如 "my-project"
   installedAt?: string
   components: Component[]
 }
@@ -35,15 +36,33 @@ interface Component {
   installedAt?: string
 }
 
+interface Project {
+  name: string
+  path: string
+}
+
 function App() {
   const [target, setTarget] = useState<'qoder' | 'cursor'>('qoder')
+  const [scope, setScope] = useState<'user' | 'project'>('user')
+  const [selectedProject, setSelectedProject] = useState<string | null>(null)
+  const [projects, setProjects] = useState<Project[]>([])
   const [view, setView] = useState<'packages' | 'components'>('packages')
-  const [packages, setPackages] = useState<any[]>([])
+  const [packages, setPackages] = useState<Package[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    fetchProjects()
     fetchPackages()
-  }, [target])
+  }, [target, scope, selectedProject])
+
+  const fetchProjects = async () => {
+    // 模拟获取项目列表
+    setProjects([
+      { name: 'local-skill-hub', path: '/Users/zhongyangyang/PycharmProjects/local-skill-hub' },
+      { name: 'my-project', path: '/Users/zhongyangyang/projects/my-project' },
+      { name: 'api-server', path: '/Users/zhongyangyang/projects/api-server' },
+    ])
+  }
 
   const fetchPackages = async () => {
     setLoading(true)
@@ -58,6 +77,7 @@ function App() {
         installed: true,
         installPath: '~/.qoder/skills/superpowers',
         scope: 'user',
+        projectName: undefined,
         installedAt: '2024-01-15 10:30',
         components: [
           { id: '1', name: 'brainstorming', type: 'skill', packageName: 'superpowers', installed: true, installPath: '~/.qoder/skills/superpowers/brainstorming', installedAt: '2024-01-15 10:30' },
@@ -74,10 +94,25 @@ function App() {
         installed: true,
         installPath: '.qoder/skills/open-spec',
         scope: 'project',
+        projectName: 'local-skill-hub',
         installedAt: '2024-02-20 14:15',
         components: [
           { id: '5', name: 'api-design', type: 'skill', packageName: 'open-spec', installed: true, installPath: '.qoder/skills/open-spec/api-design', installedAt: '2024-02-20 14:15' },
           { id: '6', name: 'typescript-rules', type: 'rule', packageName: 'open-spec', installed: true, installPath: '.qoder/skills/open-spec/typescript-rules', installedAt: '2024-02-20 14:15' },
+        ]
+      },
+      {
+        id: '5',
+        name: 'debug-kit',
+        target: 'qoder',
+        version: 'v1.2.0',
+        installed: true,
+        installPath: '.qoder/skills/debug-kit',
+        scope: 'project',
+        projectName: 'my-project',
+        installedAt: '2024-03-10 11:00',
+        components: [
+          { id: '11', name: 'systematic-debugging', type: 'skill', packageName: 'debug-kit', installed: true, installPath: '.qoder/skills/debug-kit/systematic-debugging', installedAt: '2024-03-10 11:00' },
         ]
       }
     ]
@@ -91,6 +126,7 @@ function App() {
         installed: true,
         installPath: '~/.cursorrules/cursor-tools',
         scope: 'user',
+        projectName: undefined,
         installedAt: '2024-03-01 09:00',
         components: [
           { id: '7', name: 'cursor-skill', type: 'skill', packageName: 'cursor-tools', installed: true, installPath: '~/.cursorrules/cursor-tools/cursor-skill', installedAt: '2024-03-01 09:00' },
@@ -105,6 +141,7 @@ function App() {
         installed: false,
         installPath: '',
         scope: 'user',
+        projectName: undefined,
         installedAt: undefined,
         components: [
           { id: '9', name: 'brainstorming', type: 'skill', packageName: 'superpowers', installed: false, installPath: '' },
@@ -113,7 +150,16 @@ function App() {
       }
     ]
     
-    setPackages(target === 'qoder' ? qoderPackages : cursorPackages)
+    // 根据 scope 和 selectedProject 过滤
+    let allPackages = target === 'qoder' ? qoderPackages : cursorPackages
+    
+    if (scope === 'user') {
+      allPackages = allPackages.filter(p => p.scope === 'user')
+    } else if (scope === 'project' && selectedProject) {
+      allPackages = allPackages.filter(p => p.scope === 'project' && p.projectName === selectedProject)
+    }
+    
+    setPackages(allPackages)
     setLoading(false)
   }
 
@@ -123,28 +169,73 @@ function App() {
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">Easy Skills Hub</h1>
-          {/* IDE Selector - Segmented Control */}
-          <div className="inline-flex rounded-lg border border-gray-200 bg-gray-100 p-1">
-            <button
-              onClick={() => setTarget('qoder')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
-                target === 'qoder'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Qoder
-            </button>
-            <button
-              onClick={() => setTarget('cursor')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
-                target === 'cursor'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Cursor
-            </button>
+          <div className="flex items-center gap-4">
+            {/* Scope Selector */}
+            <div className="inline-flex rounded-lg border border-gray-200 bg-gray-100 p-1">
+              <button
+                onClick={() => {
+                  setScope('user')
+                  setSelectedProject(null)
+                }}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                  scope === 'user'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                User
+              </button>
+              <button
+                onClick={() => setScope('project')}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                  scope === 'project'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Project
+              </button>
+            </div>
+            
+            {/* Project Selector (only show when scope is project) */}
+            {scope === 'project' && (
+              <select
+                value={selectedProject || ''}
+                onChange={(e) => setSelectedProject(e.target.value || null)}
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg bg-white"
+              >
+                <option value="">Select project...</option>
+                {projects.map((proj) => (
+                  <option key={proj.name} value={proj.name}>
+                    {proj.name}
+                  </option>
+                ))}
+              </select>
+            )}
+            
+            {/* IDE Selector - Segmented Control */}
+            <div className="inline-flex rounded-lg border border-gray-200 bg-gray-100 p-1">
+              <button
+                onClick={() => setTarget('qoder')}
+                className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
+                  target === 'qoder'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Qoder
+              </button>
+              <button
+                onClick={() => setTarget('cursor')}
+                className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
+                  target === 'cursor'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Cursor
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -230,6 +321,11 @@ function App() {
                     <FolderOpen className="w-4 h-4 text-gray-400" />
                   )}
                   <code className="text-gray-600 text-xs truncate">{pkg.installPath || 'N/A'}</code>
+                  {pkg.scope === 'project' && pkg.projectName && (
+                    <span className="px-1.5 py-0.5 bg-purple-100 text-purple-700 text-xs rounded">
+                      {pkg.projectName}
+                    </span>
+                  )}
                 </div>
                 
                 {pkg.installed && pkg.installedAt && (

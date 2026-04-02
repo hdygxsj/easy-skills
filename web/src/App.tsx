@@ -662,16 +662,26 @@ function App() {
                     Manage via AI
                   </h3>
                   <p className="text-gray-600 mb-3">
-                    Tell AI Agent to manage skills:
+                    Tell AI Agent to manage skills (use natural language):
                   </p>
                   <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm space-y-2">
-                    <p className="text-gray-500"># Check installed packages</p>
-                    <p className="text-purple-600">/easy-skills 查看已安装的 packages</p>
-                    <p className="text-gray-500 mt-2"># View package details</p>
-                    <p className="text-purple-600">/easy-skills 帮我看看 superpowers 这个包有哪些 skills</p>
-                    <p className="text-gray-500 mt-2"># Switch IDE target</p>
+                    <p className="text-gray-500"># Browse packages</p>
+                    <p className="text-purple-600">/easy-skills 列出 qoder 可用的 packages</p>
+                    <p className="text-gray-500 mt-2"># View details</p>
+                    <p className="text-purple-600">/easy-skills 看看 superpowers 包有哪些 skills</p>
+                    <p className="text-gray-500 mt-2"># Install</p>
+                    <p className="text-purple-600">/easy-skills 帮我安装 superpowers 到 qoder</p>
+                    <p className="text-gray-500 mt-2"># Uninstall</p>
+                    <p className="text-purple-600">/easy-skills 卸载这个 package</p>
+                    <p className="text-gray-500 mt-2"># Upgrade</p>
+                    <p className="text-purple-600">/easy-skills 升级 superpowers 到最新版本</p>
+                    <p className="text-gray-500 mt-2"># Version history</p>
+                    <p className="text-purple-600">/easy-skills 查看 superpowers 的版本历史</p>
+                    <p className="text-gray-500 mt-2"># Rollback</p>
+                    <p className="text-purple-600">/easy-skills 回滚 superpowers 到某个版本</p>
+                    <p className="text-gray-500 mt-2"># Switch target</p>
                     <p className="text-purple-600">/easy-skills 把目标 IDE 切换成 cursor</p>
-                    <p className="text-gray-500 mt-2"># Check installation status</p>
+                    <p className="text-gray-500 mt-2"># Check status</p>
                     <p className="text-orange-600">easy-skills status --ide qoder</p>
                   </div>
                 </section>

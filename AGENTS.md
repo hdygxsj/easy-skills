@@ -76,8 +76,11 @@ On error:
 **版本号规则：** CLI 和 npm 使用相同版本号（如 0.1.4）
 
 ```bash
+# 设置版本号变量（后续步骤使用）
+export VERSION=0.1.4
+
 # 更新 npm/package.json 版本
-vim npm/package.json  # 修改 version 字段
+vim npm/package.json  # 修改 version 字段为 $VERSION
 ```
 
 ### Complete Release Flow
@@ -107,7 +110,7 @@ make build-tauri
 # 2. 点击 "Choose a tag" 输入 v0.1.4
 # 3. 上传两个文件：
 #    - releases/bin/easy-skills-macos-aarch64（命名为 easy-skills-cli-macos-aarch64）
-#    - releases/Easy Skills_0.1.0_aarch64.dmg
+#    - releases/Easy Skills_$VERSION_aarch64.dmg  ($VERSION = 当前版本号)
 # 4. 点击 "Publish release"
 
 # 方案 B: API 上传（需要 GitHub Token）
@@ -125,8 +128,8 @@ curl -X POST \
 curl -X POST \
   -H "Authorization: Bearer $GH_TOKEN" \
   -H "Content-Type: application/x-apple-diskimage" \
-  "https://uploads.github.com/repos/hdygxsj/easy-skills/releases/$RELEASE_ID/assets?name=Easy%20Skills_0.1.0_aarch64.dmg" \
-  --data-binary @releases/Easy\ Skills_0.1.0_aarch64.dmg
+  "https://uploads.github.com/repos/hdygxsj/easy-skills/releases/$RELEASE_ID/assets?name=Easy%20Skills_$VERSION_aarch64.dmg" \
+  --data-binary @releases/Easy\ Skills_$VERSION_aarch64.dmg
 ```
 
 ```bash

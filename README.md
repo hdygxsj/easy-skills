@@ -79,7 +79,13 @@ Download from [GitHub Releases](https://github.com/hdygxsj/easy-skills/releases)
 - `Easy Skills.dmg` - macOS installer
 - `easy-skills-source.tar.gz` - Source code
 
-### Install CLI via Go
+### Install CLI via npm (Recommended)
+
+```bash
+npm install -g easy-skills-cli
+```
+
+### Install CLI via Go (Alternative)
 
 ```bash
 go install github.com/hdygxsj/easy-skills@latest
@@ -115,10 +121,11 @@ npm run dev
 ### 1. Install CLI
 
 ```bash
-# Install via go
-go install github.com/hdygxsj/easy-skills@latest
+# Install via npm (recommended)
+npm install -g easy-skills-cli
 
-# Or download from releases
+# Or via Go
+go install github.com/hdygxsj/easy-skills@latest
 ```
 
 ### 2. Start Web GUI or Mac App
@@ -137,7 +144,7 @@ open releases/Easy\ Skills.dmg
 Tell your AI Agent to install:
 
 ```
-/easy-skills Fetch and follow instructions from http://localhost:27842/qoder/easy-skills.md
+Fetch and follow instructions from http://localhost:27842/qoder/easy-skills.md
 ```
 
 ### 4. Done! 

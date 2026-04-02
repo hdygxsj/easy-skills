@@ -20,7 +20,7 @@ mv ~/Downloads/easy-skills /usr/local/bin/easy-skills
 
 ### Option C: Via Go
 ```bash
-go install github.com/hdygxsj/easy-skills@latest
+npm install -g easy-skills-cli
 ```
 
 ## Step 2: Start the Hub

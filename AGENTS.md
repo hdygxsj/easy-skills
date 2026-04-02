@@ -71,7 +71,7 @@ On error:
 1. **macOS ARM64 binary** - `easy-skills-macos-aarch64`
 2. **npm package** - CLI via `npm publish`
 
-> Note: Users on other platforms can install via `npm install -g easy-skills`
+> Note: Users on other platforms can install via `npm install -g easy-skills-cli`
 
 ### Build Steps
 

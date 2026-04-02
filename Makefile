@@ -77,20 +77,12 @@ release: build build-tauri source-tar
 	@echo "Release artifacts:"
 	@ls -la releases/
 
-# Cross-compile Go CLI for multiple platforms
+# Cross-compile Go CLI for macOS ARM64 only
 build-cross:
-	@echo "Building cross-platform binaries..."
+	@echo "Building macOS ARM64 binary..."
 	@mkdir -p releases/bin
-	# macOS x64
-	GOOS=darwin GOARCH=amd64 go build -o releases/bin/easy-skills-macos-x86_64 ./cmd/easy-skills
 	# macOS ARM64
-	GOOS=darwin GOARCH=arm64 go build -o releases/bin/easy-skills-macos-aarch64 ./cmd/easy-skills
-	# Linux x64
-	GOOS=linux GOARCH=amd64 go build -o releases/bin/easy-skills-linux-x86_64 ./cmd/easy-skills
-	# Linux ARM64
-	GOOS=linux GOARCH=arm64 go build -o releases/bin/easy-skills-linux-aarch64 ./cmd/easy-skills
-	# Windows x64
-	GOOS=windows GOARCH=amd64 go build -o releases/bin/easy-skills-windows-x86_64.exe ./cmd/easy-skills
+	GOOS=darwin GOARCH=arm64 go build -o releases/bin/easy-skills-cli-macos-aarch64 ./cmd/easy-skills
 	@echo "Cross-platform binaries built:"
 	@ls -la releases/bin/
 

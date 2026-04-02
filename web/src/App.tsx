@@ -65,7 +65,7 @@ function App() {
 
       {/* Install Guide Banner */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg m-6 p-4">
-        <h2 className="text-lg font-semibold text-blue-900 mb-2">Install Easy Skills in Your AI IDE</h2>
+        <h2 className="text-lg font-semibold text-blue-900 mb-2">📦 Install Easy Skills in Your AI IDE</h2>
         <div className="space-y-2 text-sm">
           <div>
             <span className="font-medium text-blue-700">Qoder:</span>

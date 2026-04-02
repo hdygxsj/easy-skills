@@ -73,20 +73,21 @@ On error:
 
 ### Version Management
 
-**版本号规则：** CLI 和 npm 使用相同版本号（如 0.1.4）
+**版本号规则：** CLI 和 npm 使用相同版本号
 
 ```bash
-# 设置版本号变量（后续步骤使用）
-export VERSION=0.1.4
-
-# 更新 npm/package.json 版本
-vim npm/package.json  # 修改 version 字段为 $VERSION
+# 从 package.json 读取版本号
+VERSION=$(node -p "require('./npm/package.json').version")
+echo "Release version: $VERSION"
 ```
 
 ### Complete Release Flow
 
 ```bash
 # ========== Step 1: 构建 ==========
+
+# 读取版本号
+VERSION=$(node -p "require('./npm/package.json').version")
 
 # 构建前端（必须）
 cd web && npm install && npm run build && cd ..
@@ -99,21 +100,24 @@ make build-tauri
 
 # 构建产物位置：
 # - CLI: releases/bin/easy-skills-macos-aarch64
-# - App: releases/Easy Skills_X.Y.Z_aarch64.dmg
+# - App: releases/Easy Skills_${VERSION}_aarch64.dmg
 ```
 
 ```bash
 # ========== Step 2: GitHub Release ==========
 
+VERSION=$(node -p "require('./npm/package.json').version")
+
 # 方案 A: 网页操作
 # 1. 访问 https://github.com/hdygxsj/easy-skills/releases/new
-# 2. 点击 "Choose a tag" 输入 v0.1.4
+# 2. 点击 "Choose a tag" 输入 v$VERSION
 # 3. 上传两个文件：
 #    - releases/bin/easy-skills-macos-aarch64（命名为 easy-skills-cli-macos-aarch64）
-#    - releases/Easy Skills_$VERSION_aarch64.dmg  ($VERSION = 当前版本号)
+#    - releases/Easy Skills_${VERSION}_aarch64.dmg
 # 4. 点击 "Publish release"
 
 # 方案 B: API 上传（需要 GitHub Token）
+VERSION=$(node -p "require('./npm/package.json').version")
 RELEASE_ID="your_release_id"  # 从 release URL 获取
 GH_TOKEN="ghp_xxx"
 
@@ -128,22 +132,24 @@ curl -X POST \
 curl -X POST \
   -H "Authorization: Bearer $GH_TOKEN" \
   -H "Content-Type: application/x-apple-diskimage" \
-  "https://uploads.github.com/repos/hdygxsj/easy-skills/releases/$RELEASE_ID/assets?name=Easy%20Skills_$VERSION_aarch64.dmg" \
-  --data-binary @releases/Easy\ Skills_$VERSION_aarch64.dmg
+  "https://uploads.github.com/repos/hdygxsj/easy-skills/releases/$RELEASE_ID/assets?name=Easy%20Skills_${VERSION}_aarch64.dmg" \
+  --data-binary @releases/Easy\ Skills_${VERSION}_aarch64.dmg
 ```
 
 ```bash
 # ========== Step 3: npm 发布 ==========
 
+VERSION=$(node -p "require('./npm/package.json').version")
+
 # 配置 npm token
 npm config set //registry.npmjs.org/:_authToken=npm_xxx
 
-# 发布（注意：每次发布必须升级版本号）
+# 发布（注意：每次发布必须升级 package.json 中的版本号）
 cd npm
 npm publish
 
 # 验证
-npm view easy-skills-cli version  # 应显示最新版本
+npm view easy-skills-cli version  # 应显示 $VERSION
 npm install -g easy-skills-cli    # 测试安装
 ```
 

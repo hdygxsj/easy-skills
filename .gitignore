@@ -15,13 +15,19 @@
 vendor/
 
 # Build artifacts
-easy-skills
 internal/cli/dist
 web/dist
 src-tauri/index.html
 src-tauri/assets
 src-tauri/qoder
 src-tauri/cursor
+src-tauri/gen
+
+# Releases (final distribution)
+releases/
+
+# Build output
+easy-skills
 
 # Local skill hub data
 hub.db

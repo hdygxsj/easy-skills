@@ -51,7 +51,11 @@ install:
 
 # Build Tauri Mac App bundle (app + dmg)
 build-tauri:
+	@echo "Copying web assets for Tauri..."
+	cp -r web/dist src-tauri/assets
 	cd src-tauri && cargo tauri build
+	@echo "Copying frontend assets to app bundle..."
+	cp -r src-tauri/assets/dist/* "src-tauri/target/release/bundle/macos/Easy Skills.app/Contents/Resources/" 2>/dev/null || true
 	@echo "Moving bundles to releases..."
 	mkdir -p releases
 	mv src-tauri/target/release/bundle/macos/*.app releases/ 2>/dev/null || true

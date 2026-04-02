@@ -7,16 +7,18 @@
     "beforeDevCommand": "cd ../web && npm run dev",
     "beforeBuildCommand": "echo 'Web already built via make build'",
     "devUrl": "http://localhost:27842",
-    "frontendDist": "../web/dist"
+    "frontendDist": "./assets/dist"
   },
   "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
         "title": "Easy Skills Hub",
         "width": 900,
         "height": 700,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "url": "index.html"
       }
     ]
   },

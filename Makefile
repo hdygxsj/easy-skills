@@ -1,4 +1,4 @@
-.PHONY: all build build-all test clean dev serve install release dist
+.PHONY: all build build-all test clean dev serve install release dist build-cross upload-npm npm-publish
 
 # Default target
 all: build
@@ -76,3 +76,34 @@ release: build build-tauri source-tar
 	mv src-tauri/target/release/bundle/macos/Easy\ Skills.app releases/ 2>/dev/null || true
 	@echo "Release artifacts:"
 	@ls -la releases/
+
+# Cross-compile Go CLI for multiple platforms
+build-cross:
+	@echo "Building cross-platform binaries..."
+	@mkdir -p releases/bin
+	# macOS x64
+	GOOS=darwin GOARCH=amd64 go build -o releases/bin/easy-skills-macos-x86_64 ./cmd/easy-skills
+	# macOS ARM64
+	GOOS=darwin GOARCH=arm64 go build -o releases/bin/easy-skills-macos-aarch64 ./cmd/easy-skills
+	# Linux x64
+	GOOS=linux GOARCH=amd64 go build -o releases/bin/easy-skills-linux-x86_64 ./cmd/easy-skills
+	# Linux ARM64
+	GOOS=linux GOARCH=arm64 go build -o releases/bin/easy-skills-linux-aarch64 ./cmd/easy-skills
+	# Windows x64
+	GOOS=windows GOARCH=amd64 go build -o releases/bin/easy-skills-windows-x86_64.exe ./cmd/easy-skills
+	@echo "Cross-platform binaries built:"
+	@ls -la releases/bin/
+
+# Upload cross-platform binaries to GitHub Releases
+upload-npm:
+	@echo "Setting up npm package..."
+	@mkdir -p npm/bin
+	@mkdir -p npm/scripts
+	@echo "Copying cross-platform binaries to npm package..."
+	cp releases/bin/* npm/bin/
+	@echo "Ready for npm publish. Run: cd npm && npm publish"
+	@ls -la npm/bin/
+
+# Publish npm package (requires GitHub Releases to be created first)
+npm-publish:
+	@cd npm && npm publish --access public

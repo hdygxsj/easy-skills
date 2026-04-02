@@ -1,0 +1,39 @@
+{
+  "name": "easy-skills",
+  "version": "0.1.0",
+  "description": "Easy Skills CLI - Local Skill Hub for AI IDEs",
+  "keywords": ["skills", "ai", "ide", "plugins", "extensions"],
+  "homepage": "https://github.com/hdygxsj/easy-skills",
+  "bugs": {
+    "url": "https://github.com/hdygxsj/easy-skills/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "hdygxsj",
+    "email": "hdygxsj@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hdygxsj/easy-skills.git"
+  },
+  "main": "index.js",
+  "bin": {
+    "easy-skills": "./bin/easy-skills"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "scripts": {
+    "postinstall": "node scripts/install.js",
+    "test": "echo \"No tests yet\""
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

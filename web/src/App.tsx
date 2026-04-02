@@ -636,61 +636,73 @@ function App() {
             </div>
             <div className="p-6 overflow-y-auto max-h-[calc(80vh-72px)]">
               <div className="space-y-6">
-                {/* Install Skills */}
+                {/* Register */}
                 <section>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <PackageIcon className="w-5 h-5 text-blue-500" />
-                    Install
+                    Register
                   </h3>
                   <p className="text-gray-600 mb-3">
-                    Tell AI Agent to install skills:
+                    Register a skill package to Hub:
                   </p>
                   <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm space-y-1">
-                    <p className="text-gray-500"># Install a skill package</p>
-                    <p className="text-blue-600">/easy-skills install https://raw.githubusercontent.com/hdygxsj/superpowers/refs/heads/main/.qoder/INSTALL.md</p>
+                    <p className="text-gray-500"># Register from URL</p>
+                    <p className="text-blue-600">easy-skills register --name superpowers --target qoder --source https://github.com/...</p>
                   </div>
-                  <p className="text-gray-500 text-sm mt-2">
-                    This will install the skill to your IDE and register it in the Skill Hub.
-                  </p>
                 </section>
 
-                {/* Skill */}
+                {/* List */}
                 <section>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <Target className="w-5 h-5 text-green-500" />
-                    Skill
+                    List
                   </h3>
                   <p className="text-gray-600 mb-3">
-                    Skills are markdown files that provide specialized capabilities:
+                    List packages in Hub:
                   </p>
                   <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm space-y-1">
-                    <p className="text-gray-500"># List available skills</p>
-                    <p className="text-green-600">/easy-skills list</p>
-                    <p className="text-gray-500"># Or ask AI Agent naturally</p>
-                    <p className="text-green-600">"I need help with project planning"</p>
+                    <p className="text-gray-500"># List all packages</p>
+                    <p className="text-green-600">easy-skills list</p>
+                    <p className="text-gray-500"># List by IDE</p>
+                    <p className="text-green-600">easy-skills list --target qoder</p>
                   </div>
                 </section>
 
-                {/* Agent */}
+                {/* Status */}
                 <section>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <Bot className="w-5 h-5 text-purple-500" />
-                    Agent
+                    Status
                   </h3>
                   <p className="text-gray-600 mb-3">
-                    Agents are specialized AI subagents:
+                    Check installation status:
                   </p>
                   <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm space-y-1">
-                    <p className="text-gray-500"># Start a coding task</p>
-                    <p className="text-purple-600">/easy-skills dev</p>
-                    <p className="text-gray-500"># AI Agent coordinates agents</p>
+                    <p className="text-gray-500"># Check IDE status</p>
+                    <p className="text-purple-600">easy-skills status --ide qoder</p>
+                  </div>
+                </section>
+
+                {/* Serve */}
+                <section>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Anchor className="w-5 h-5 text-orange-500" />
+                    Web GUI
+                  </h3>
+                  <p className="text-gray-600 mb-3">
+                    Start the web interface:
+                  </p>
+                  <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm space-y-1">
+                    <p className="text-gray-500"># Start GUI server</p>
+                    <p className="text-orange-600">easy-skills serve</p>
+                    <p className="text-gray-500"># Open http://localhost:27842</p>
                   </div>
                 </section>
 
                 {/* Hook */}
                 <section>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <Anchor className="w-5 h-5 text-orange-500" />
+                    <Ruler className="w-5 h-5 text-red-500" />
                     Hook
                   </h3>
                   <p className="text-gray-600 mb-3">
@@ -698,24 +710,8 @@ function App() {
                   </p>
                   <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm space-y-1">
                     <p className="text-gray-500"># Hooks are installed with packages</p>
-                    <p className="text-orange-600">git commit -m "fix: issue"</p>
+                    <p className="text-red-600">git commit -m "fix: issue"</p>
                     <p className="text-gray-400">→ pre-commit hook runs automatically</p>
-                  </div>
-                </section>
-
-                {/* Rule */}
-                <section>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <Ruler className="w-5 h-5 text-red-500" />
-                    Rule
-                  </h3>
-                  <p className="text-gray-600 mb-3">
-                    Rules define coding standards:
-                  </p>
-                  <div className="bg-gray-100 rounded-lg p-3 font-mono text-sm space-y-1">
-                    <p className="text-gray-500"># Rules apply during code generation</p>
-                    <p className="text-red-600">/easy-skills list --type rule</p>
-                    <p className="text-gray-400">→ AI follows TypeScript rules</p>
                   </div>
                 </section>
 

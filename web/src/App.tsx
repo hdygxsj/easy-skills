@@ -17,7 +17,7 @@ interface Component {
 
 function App() {
   const [target, setTarget] = useState<'qoder' | 'cursor'>('qoder')
-  const [view, setView] = useState<'packages' | 'skills'>('packages')
+  const [view, setView] = useState<'packages' | 'components'>('packages')
   const [packages, setPackages] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -110,14 +110,14 @@ function App() {
             Packages
           </button>
           <button
-            onClick={() => setView('skills')}
+            onClick={() => setView('components')}
             className={`py-3 px-1 border-b-2 font-medium ${
-              view === 'skills'
+              view === 'components'
                 ? 'border-primary text-primary'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
-            Skills
+            Components
           </button>
         </nav>
       </div>
@@ -126,7 +126,7 @@ function App() {
       <main className="p-6">
         {loading ? (
           <div className="text-center py-12 text-gray-500">Loading...</div>
-        ) : view === 'packages' ? (
+        ) : view === 'components' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {packages.map((pkg) => (
               <div key={pkg.name} className="bg-gray-50 rounded-lg p-4 border border-gray-200">

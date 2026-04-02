@@ -255,11 +255,11 @@ SKILL.md 中包含：
 │  │                                                           │  │
 │  │  Qoder:                                                   │  │
 │  │  /easy-skills Fetch and follow instructions from          │  │
-│  │  http://localhost:27842/qoder/easy-skills.md            │  │
+│  │  http://localhost:27842/qoder/SKILL.md            │  │
 │  │                                                           │  │
 │  │  Cursor:                                                  │  │
 │  │  Fetch and follow instructions from                      │  │
-│  │  http://localhost:27842/cursor/easy-skills.md           │  │
+│  │  http://localhost:27842/cursor/SKILL.md           │  │
 │  └───────────────────────────────────────────────────────────┘  │
 ├─────────────────────────────────────────────────────────────────┤
 │  [Packages] [Skills]                            [Qoder ▼]     │
@@ -422,8 +422,8 @@ interface Installation {
 | `/api/packages/:name` | GET | Package 详情 |
 | `/api/components` | GET | 所有 Components（带安装状态）|
 | `/api/installations` | GET | 所有安装记录 |
-| `/api/qoder/easy-skills.md` | GET | Qoder 安装指引 |
-| `/api/cursor/easy-skills.md` | GET | Cursor 安装指引 |
+| `/api/qoder/SKILL.md` | GET | Qoder 安装指引 |
+| `/api/cursor/SKILL.md` | GET | Cursor 安装指引 |
 
 ### 8.4 项目结构
 

@@ -36,7 +36,7 @@ This starts the Web GUI at http://localhost:27842
 Tell your AI Agent:
 
 ```
-Fetch and follow instructions from http://localhost:27842/cursor/easy-skills.md
+Fetch and follow instructions from http://localhost:27842/cursor/SKILL.md
 ```
 
 This will install the skill file to `~/.cursorrules/easy-skills/`.

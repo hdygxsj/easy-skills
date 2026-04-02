@@ -57,116 +57,118 @@ function App() {
   }, [target, scope, selectedProject])
 
   const fetchProjects = async () => {
-    // 模拟获取项目列表
-    setProjects([
-      { name: 'local-skill-hub', path: '/Users/zhongyangyang/PycharmProjects/local-skill-hub' },
-      { name: 'my-project', path: '/Users/zhongyangyang/projects/my-project' },
-      { name: 'api-server', path: '/Users/zhongyangyang/projects/api-server' },
-    ])
+    try {
+      const res = await fetch('/api/projects')
+      const data = await res.json()
+      setProjects(data.projects || [])
+    } catch (err) {
+      console.error('Failed to fetch projects:', err)
+      // Fallback to mock
+      setProjects([
+        { name: 'local-skill-hub', path: '/Users/zhongyangyang/PycharmProjects/local-skill-hub' },
+        { name: 'my-project', path: '/Users/zhongyangyang/projects/my-project' },
+        { name: 'api-server', path: '/Users/zhongyangyang/projects/api-server' },
+      ])
+    }
   }
 
   const fetchPackages = async () => {
     setLoading(true)
     
-    // Simulate API call with different data based on target
-    const qoderPackages: Package[] = [
-      {
-        id: '1',
-        name: 'superpowers',
-        target: 'qoder',
-        version: 'v1.0.0',
+    try {
+      const res = await fetch(`/api/packages?target=${target}`)
+      const data = await res.json()
+      
+      // Transform CLI output to our format
+      const packages: Package[] = (data.packages || []).map((p: any) => ({
+        id: p.package?.id || '',
+        name: p.package?.name || '',
+        target: p.package?.target || target,
+        version: p.current_version?.metadata ? JSON.parse(p.current_version.metadata).version || 'v1' : 'v1',
         installed: true,
-        installPath: '~/.qoder/skills/superpowers',
-        scope: 'user',
+        installPath: '~/.local/easy-skills',
+        scope: 'user' as const,
         projectName: undefined,
-        installedAt: '2024-01-15 10:30',
-        components: [
-          { id: '1', name: 'brainstorming', type: 'skill', packageName: 'superpowers', installed: true, installPath: '~/.qoder/skills/superpowers/brainstorming', installedAt: '2024-01-15 10:30' },
-          { id: '2', name: 'writing-plans', type: 'skill', packageName: 'superpowers', installed: true, installPath: '~/.qoder/skills/superpowers/writing-plans', installedAt: '2024-01-15 10:30' },
-          { id: '3', name: 'test-driven-development', type: 'skill', packageName: 'superpowers', installed: true, installPath: '~/.qoder/skills/superpowers/test-driven-development', installedAt: '2024-01-15 10:30' },
-          { id: '4', name: 'subagent-driven-dev', type: 'agent', packageName: 'superpowers', installed: true, installPath: '~/.qoder/skills/superpowers/subagent-driven-development', installedAt: '2024-01-15 10:30' },
-        ]
-      },
-      {
-        id: '2',
-        name: 'open-spec',
-        target: 'qoder',
-        version: 'v2.0.0',
-        installed: true,
-        installPath: '.qoder/skills/open-spec',
-        scope: 'project',
-        projectName: 'local-skill-hub',
-        installedAt: '2024-02-20 14:15',
-        components: [
-          { id: '5', name: 'api-design', type: 'skill', packageName: 'open-spec', installed: true, installPath: '.qoder/skills/open-spec/api-design', installedAt: '2024-02-20 14:15' },
-          { id: '6', name: 'typescript-rules', type: 'rule', packageName: 'open-spec', installed: true, installPath: '.qoder/skills/open-spec/typescript-rules', installedAt: '2024-02-20 14:15' },
-        ]
-      },
-      {
-        id: '5',
-        name: 'debug-kit',
-        target: 'qoder',
-        version: 'v1.2.0',
-        installed: true,
-        installPath: '.qoder/skills/debug-kit',
-        scope: 'project',
-        projectName: 'my-project',
-        installedAt: '2024-03-10 11:00',
-        components: [
-          { id: '11', name: 'systematic-debugging', type: 'skill', packageName: 'debug-kit', installed: true, installPath: '.qoder/skills/debug-kit/systematic-debugging', installedAt: '2024-03-10 11:00' },
-        ]
+        installedAt: p.current_version?.created_at || '',
+        components: (p.components || []).map((c: any) => ({
+          id: c.id || '',
+          name: c.name || '',
+          type: c.type as 'skill' | 'agent' | 'hook' | 'rule',
+          packageName: p.package?.name,
+          installed: true,
+          installPath: c.path || '',
+          installedAt: '',
+        })),
+      }))
+      
+      setPackages(packages)
+    } catch (err) {
+      console.error('Failed to fetch packages:', err)
+      // Fallback to mock data
+      const qoderPackages: Package[] = [
+        {
+          id: '1',
+          name: 'superpowers',
+          target: 'qoder',
+          version: 'v1.0.0',
+          installed: true,
+          installPath: '~/.qoder/skills/superpowers',
+          scope: 'user',
+          projectName: undefined,
+          installedAt: '2024-01-15 10:30',
+          components: [
+            { id: '1', name: 'brainstorming', type: 'skill', packageName: 'superpowers', installed: true, installPath: '~/.qoder/skills/superpowers/brainstorming', installedAt: '2024-01-15 10:30' },
+            { id: '2', name: 'writing-plans', type: 'skill', packageName: 'superpowers', installed: true, installPath: '~/.qoder/skills/superpowers/writing-plans', installedAt: '2024-01-15 10:30' },
+          ]
+        },
+        {
+          id: '2',
+          name: 'open-spec',
+          target: 'qoder',
+          version: 'v2.0.0',
+          installed: true,
+          installPath: '.qoder/skills/open-spec',
+          scope: 'project',
+          projectName: 'local-skill-hub',
+          installedAt: '2024-02-20 14:15',
+          components: [
+            { id: '5', name: 'api-design', type: 'skill', packageName: 'open-spec', installed: true, installPath: '.qoder/skills/open-spec/api-design', installedAt: '2024-02-20 14:15' },
+          ]
+        }
+      ]
+      
+      const cursorPackages: Package[] = [
+        {
+          id: '3',
+          name: 'cursor-tools',
+          target: 'cursor',
+          version: 'v1.5.0',
+          installed: true,
+          installPath: '~/.cursorrules/cursor-tools',
+          scope: 'user',
+          projectName: undefined,
+          installedAt: '2024-03-01 09:00',
+          components: [
+            { id: '7', name: 'cursor-skill', type: 'skill', packageName: 'cursor-tools', installed: true, installPath: '~/.cursorrules/cursor-tools/cursor-skill', installedAt: '2024-03-01 09:00' },
+          ]
+        }
+      ]
+      
+      let allPackages = target === 'qoder' ? qoderPackages : cursorPackages
+      
+      if (scope === 'user') {
+        allPackages = allPackages.filter(p => p.scope === 'user')
+      } else if (scope === 'project' && selectedProject) {
+        allPackages = allPackages.filter(p => 
+          p.scope === 'user' || (p.scope === 'project' && p.projectName === selectedProject)
+        )
+      } else if (scope === 'project' && !selectedProject) {
+        allPackages = allPackages.filter(p => p.scope === 'user')
       }
-    ]
-    
-    const cursorPackages: Package[] = [
-      {
-        id: '3',
-        name: 'cursor-tools',
-        target: 'cursor',
-        version: 'v1.5.0',
-        installed: true,
-        installPath: '~/.cursorrules/cursor-tools',
-        scope: 'user',
-        projectName: undefined,
-        installedAt: '2024-03-01 09:00',
-        components: [
-          { id: '7', name: 'cursor-skill', type: 'skill', packageName: 'cursor-tools', installed: true, installPath: '~/.cursorrules/cursor-tools/cursor-skill', installedAt: '2024-03-01 09:00' },
-          { id: '8', name: 'cursor-agent', type: 'agent', packageName: 'cursor-tools', installed: true, installPath: '~/.cursorrules/cursor-tools/cursor-agent', installedAt: '2024-03-01 09:00' },
-        ]
-      },
-      {
-        id: '4',
-        name: 'superpowers',
-        target: 'cursor',
-        version: 'v1.0.0',
-        installed: false,
-        installPath: '',
-        scope: 'user',
-        projectName: undefined,
-        installedAt: undefined,
-        components: [
-          { id: '9', name: 'brainstorming', type: 'skill', packageName: 'superpowers', installed: false, installPath: '' },
-          { id: '10', name: 'verification', type: 'skill', packageName: 'superpowers', installed: false, installPath: '' },
-        ]
-      }
-    ]
-    
-    // 根据 scope 和 selectedProject 过滤
-    let allPackages = target === 'qoder' ? qoderPackages : cursorPackages
-    
-    if (scope === 'user') {
-      allPackages = allPackages.filter(p => p.scope === 'user')
-    } else if (scope === 'project' && selectedProject) {
-      // Project 视图：同时显示 User scope（继承）和该 Project scope 的 packages
-      allPackages = allPackages.filter(p => 
-        p.scope === 'user' || (p.scope === 'project' && p.projectName === selectedProject)
-      )
-    } else if (scope === 'project' && !selectedProject) {
-      // 选择了 project 但没选具体项目，只显示 user scope
-      allPackages = allPackages.filter(p => p.scope === 'user')
+      
+      setPackages(allPackages)
     }
     
-    setPackages(allPackages)
     setLoading(false)
   }
 

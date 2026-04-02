@@ -1,9 +1,14 @@
 package cli
 
 import (
+	"encoding/json"
+	"os"
+
 	"github.com/easy-skills/easy-skills/internal/hub"
 	"github.com/spf13/cobra"
 )
+
+var listJSON bool
 
 var listCmd = &cobra.Command{
 	Use:   "list",
@@ -15,6 +20,7 @@ var listCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(listCmd)
 	listCmd.Flags().StringVar(&flagTarget, "target", "", "Filter by target (qoder/cursor)")
+	listCmd.Flags().BoolVar(&listJSON, "json", false, "Output as JSON")
 }
 
 func runList(cmd *cobra.Command, args []string) {
@@ -38,15 +44,23 @@ func runList(cmd *cobra.Command, args []string) {
 		components, _ := h.GetComponentsByVersion(version.ID)
 
 		result = append(result, map[string]interface{}{
-			"package":          pkg,
-			"current_version":  version,
+			"package":           pkg,
+			"current_version":   version,
 			"components":        components,
-			"components_count":  len(components),
+			"components_count":   len(components),
 		})
 	}
 
-	Success(map[string]interface{}{
-		"packages": result,
-		"count":    len(result),
-	})
+	if listJSON {
+		// Raw JSON output for API
+		json.NewEncoder(os.Stdout).Encode(map[string]interface{}{
+			"packages": result,
+			"count":    len(result),
+		})
+	} else {
+		Success(map[string]interface{}{
+			"packages": result,
+			"count":    len(result),
+		})
+	}
 }

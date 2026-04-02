@@ -15,13 +15,6 @@ interface Component {
   installed?: boolean
 }
 
-type GroupedComponents = {
-  skills: Component[]
-  agents: Component[]
-  hooks: Component[]
-  rules: Component[]
-}
-
 function App() {
   const [target, setTarget] = useState<'qoder' | 'cursor'>('qoder')
   const [view, setView] = useState<'packages' | 'skills'>('packages')
@@ -65,41 +58,6 @@ function App() {
       }
     ])
     setLoading(false)
-  }
-
-  // Group components by type
-  const groupComponentsByType = (components: Component[]): GroupedComponents => {
-    return {
-      skills: components.filter(c => c.type === 'skill'),
-      agents: components.filter(c => c.type === 'agent'),
-      hooks: components.filter(c => c.type === 'hook'),
-      rules: components.filter(c => c.type === 'rule'),
-    }
-  }
-
-  // Render component group
-  const renderGroup = (title: string, icon: string, items: Component[]) => {
-    if (items.length === 0) return null
-    return (
-      <div className="mb-4">
-        <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-          <span>{icon}</span>
-          <span>{title}</span>
-          <span className="text-gray-400">({items.length})</span>
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 ml-4">
-          {items.map((comp) => (
-            <div key={comp.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                <span className="text-sm font-medium">{comp.name}</span>
-              </div>
-              <span className="text-xs text-gray-400">{comp.packageName}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -185,29 +143,113 @@ function App() {
           </div>
         ) : (
           <div className="space-y-6">
-            {packages.map((pkg: any) => {
-              const grouped = groupComponentsByType(pkg.components)
-              return (
-                <div key={pkg.name} className="border border-gray-200 rounded-lg overflow-hidden">
-                  <div className="bg-gray-100 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-800">{pkg.name}</span>
-                      <span className="text-xs text-gray-500">v{pkg.version}</span>
-                    </div>
-                    <span className="text-sm text-gray-500">{pkg.components.length} components</span>
-                  </div>
-                  <div className="p-4">
-                    {renderGroup('🎯 Skills', '🎯', grouped.skills)}
-                    {renderGroup('🤖 Agents', '🤖', grouped.agents)}
-                    {renderGroup('🪝 Hooks', '🪝', grouped.hooks)}
-                    {renderGroup('📐 Rules', '📐', grouped.rules)}
-                    {pkg.components.length === 0 && (
-                      <p className="text-gray-400 text-sm">No components</p>
-                    )}
-                  </div>
+            {/* Skills Section */}
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <div className="bg-blue-50 px-4 py-3 border-b border-gray-200">
+                <h3 className="font-semibold text-blue-800 flex items-center gap-2">
+                  🎯 Skills
+                  <span className="text-sm text-blue-500 font-normal">(from packages)</span>
+                </h3>
+              </div>
+              <div className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {packages.flatMap(pkg => 
+                    pkg.components
+                      .filter((c: Component) => c.type === 'skill')
+                      .map((comp: Component) => (
+                        <div key={comp.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                            <span className="text-sm font-medium">{comp.name}</span>
+                          </div>
+                          <span className="text-xs text-gray-400">← {comp.packageName}</span>
+                        </div>
+                      ))
+                  )}
                 </div>
-              )
-            })}
+              </div>
+            </div>
+
+            {/* Agents Section */}
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <div className="bg-purple-50 px-4 py-3 border-b border-gray-200">
+                <h3 className="font-semibold text-purple-800 flex items-center gap-2">
+                  🤖 Agents
+                  <span className="text-sm text-purple-500 font-normal">(from packages)</span>
+                </h3>
+              </div>
+              <div className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {packages.flatMap(pkg => 
+                    pkg.components
+                      .filter((c: Component) => c.type === 'agent')
+                      .map((comp: Component) => (
+                        <div key={comp.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                            <span className="text-sm font-medium">{comp.name}</span>
+                          </div>
+                          <span className="text-xs text-gray-400">← {comp.packageName}</span>
+                        </div>
+                      ))
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Rules Section */}
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <div className="bg-orange-50 px-4 py-3 border-b border-gray-200">
+                <h3 className="font-semibold text-orange-800 flex items-center gap-2">
+                  📐 Rules
+                  <span className="text-sm text-orange-500 font-normal">(from packages)</span>
+                </h3>
+              </div>
+              <div className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {packages.flatMap(pkg => 
+                    pkg.components
+                      .filter((c: Component) => c.type === 'rule')
+                      .map((comp: Component) => (
+                        <div key={comp.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+                            <span className="text-sm font-medium">{comp.name}</span>
+                          </div>
+                          <span className="text-xs text-gray-400">← {comp.packageName}</span>
+                        </div>
+                      ))
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Hooks Section */}
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                <h3 className="font-semibold text-gray-700 flex items-center gap-2">
+                  🪝 Hooks
+                  <span className="text-sm text-gray-500 font-normal">(from packages)</span>
+                </h3>
+              </div>
+              <div className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {packages.flatMap(pkg => 
+                    pkg.components
+                      .filter((c: Component) => c.type === 'hook')
+                      .map((comp: Component) => (
+                        <div key={comp.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-gray-400"></span>
+                            <span className="text-sm font-medium">{comp.name}</span>
+                          </div>
+                          <span className="text-xs text-gray-400">← {comp.packageName}</span>
+                        </div>
+                      ))
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </main>

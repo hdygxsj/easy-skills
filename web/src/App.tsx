@@ -70,7 +70,7 @@ function App() {
           <div>
             <span className="font-medium text-blue-700">Qoder:</span>
             <code className="ml-2 px-2 py-1 bg-blue-100 rounded text-blue-800">
-              /easy-skills Fetch and follow instructions from http://localhost:27842/qoder/easy-skills.md
+               Fetch and follow instructions from http://localhost:27842/qoder/easy-skills.md
             </code>
           </div>
           <div>

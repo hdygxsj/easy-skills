@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
 
 var servePort string
+var serveDev bool
 
 var serveCmd = &cobra.Command{
 	Use:   "serve",
@@ -22,28 +22,19 @@ var serveCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(serveCmd)
 	serveCmd.Flags().StringVar(&servePort, "port", "27842", "Port to listen on")
+	serveCmd.Flags().BoolVar(&serveDev, "dev", false, "Run in development mode with hot reload")
 }
 
 func runServe(cmd *cobra.Command, args []string) {
-	// Find the web dist directory
-	execPath, err := os.Executable()
-	if err != nil {
-		Failf("Failed to find executable: %v", err)
-		return
-	}
-	webDist := strings.TrimSuffix(execPath, "easy-skills") + "web/dist"
-
-	// Check if dist exists
-	if _, err := os.Stat(webDist); os.IsNotExist(err) {
-		// Try running npm dev server instead
-		fmt.Println("Web dist not found, starting dev server...")
+	// Development mode - run npm dev server
+	if serveDev {
 		runNpmDev()
 		return
 	}
 
-	// Serve static files
-	http.Handle("/", http.FileServer(http.Dir(webDist)))
-	
+	// Production mode - use embedded web UI
+	http.Handle("/", ServeFileServer())
+
 	// API proxy - call CLI commands
 	http.HandleFunc("/api/packages", handlePackages)
 	http.HandleFunc("/api/projects", handleProjects)
@@ -51,18 +42,28 @@ func runServe(cmd *cobra.Command, args []string) {
 	addr := fmt.Sprintf(":%s", servePort)
 	fmt.Printf("Easy Skills Hub running at http://localhost:%s\n", servePort)
 	fmt.Printf("Press Ctrl+C to stop\n")
-	
+
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		Failf("Server error: %v", err)
 	}
 }
 
 func runNpmDev() {
+	// Find web directory
+	execPath, err := os.Executable()
+	if err != nil {
+		execPath = os.Args[0]
+	}
+
+	webDir := execPath[:len(execPath)-len("easy-skills")] + "web"
+
 	cmd := exec.Command("npm", "run", "dev")
-	cmd.Dir = strings.TrimSuffix(os.Args[0], "easy-skills") + "web"
+	cmd.Dir = webDir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Run()
+	if err := cmd.Run(); err != nil {
+		Failf("Failed to start dev server: %v", err)
+	}
 }
 
 func handlePackages(w http.ResponseWriter, r *http.Request) {

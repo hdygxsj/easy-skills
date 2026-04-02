@@ -14,6 +14,11 @@
 *.out
 vendor/
 
+# Build artifacts
+easy-skills
+internal/cli/dist
+web/dist
+
 # Local skill hub data
 hub.db
 

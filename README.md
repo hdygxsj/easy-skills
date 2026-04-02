@@ -4,15 +4,15 @@
 
 Easy Skills 是一个 AI IDE 的 Local Skill Hub，支持 Qoder 和 Cursor。通过自然语言，你的 AI Agent 可以自动安装、升级和管理各种 Skills，无需手动操作。
 
-## Features
+## 功能特性
 
-- **AI-Powered**: 告诉 AI Agent 你想要什么，它会自动完成安装和管理
-- **Multi-IDE Support**: 同时支持 Qoder 和 Cursor
-- **Package Management**: 从 GitHub 注册和管理 Skill Packages
-- **Version Tracking**: 支持版本管理和回滚
-- **Web GUI**: 现代化 Web 界面查看已安装的 Packages (http://localhost:27842)
+- **AI 驱动**：告诉 AI Agent 你想要什么，它会自动完成安装和管理
+- **多 IDE 支持**：同时支持 Qoder 和 Cursor
+- **包管理**：从 GitHub 注册和管理 Skill Packages
+- **版本追踪**：支持版本管理和回滚
+- **Web 界面**：现代化 Web 界面查看已安装的 Packages (http://localhost:27842)
 
-## Architecture
+## 架构设计
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -61,108 +61,86 @@ Easy Skills 是一个 AI IDE 的 Local Skill Hub，支持 Qoder 和 Cursor。通
   easy-skills serve --port 27842    # 启动 Web 服务
   ```
 
-## Concepts
+## 核心概念
 
-| Term | Definition |
-|------|------------|
+| 术语 | 定义 |
+|------|------|
 | **Package** | 可分发的技能包，包含多个 Components |
 | **Component** | Package 中的最小单位（skill/agent/hook/rule） |
 | **Target** | 目标 IDE 类型（qoder/cursor） |
 | **Installation** | Component 安装到 IDE 目录的记录 |
 
-## Installation
+## Installation（给人类阅读）
 
-### Install from Release (Recommended)
+### 从 Release 下载安装（推荐）
 
-Download from [GitHub Releases](https://github.com/hdygxsj/easy-skills/releases):
+从 [GitHub Releases](https://github.com/hdygxsj/easy-skills/releases) 下载：
 
-- `easy-skills` - CLI binary for macOS/Linux
-- `Easy Skills.dmg` - macOS installer
-- `easy-skills-source.tar.gz` - Source code
+- `easy-skills` - macOS/Linux CLI 二进制
+- `Easy Skills.dmg` - macOS 安装器
+- `easy-skills-source.tar.gz` - 源代码
 
-### Install CLI via npm (Recommended)
+### 通过 npm 安装 CLI（推荐）
 
 ```bash
 npm install -g easy-skills-cli
 ```
 
-### Install CLI via Go (Alternative)
+### 从源码构建
 
 ```bash
-go install github.com/hdygxsj/easy-skills@latest
-```
-
-### Build from Source
-
-```bash
-# Clone the repo
+# 克隆仓库
 git clone https://github.com/hdygxsj/easy-skills.git
 cd easy-skills
 
-# Build CLI + Mac App + Source
+# 构建 CLI + Mac App + 源码包
 make release
 
-# Or build individually:
-make build          # CLI only
-make build-tauri   # Mac App only
-make source-tar    # Source archive only
+# 或单独构建：
+make build          # 仅 CLI
+make build-tauri   # 仅 Mac App
+make source-tar    # 仅源码包
 ```
 
-### Build Web UI (for development)
+### 构建 Web UI（开发用）
 
 ```bash
 cd web
 npm install
 npm run dev
-# Open http://localhost:27842
+# 打开 http://localhost:27842
 ```
 
-## Quick Start
+## Installation（给 Agent 阅读）
 
-### 1. Tell Your AI Agent to Install
+最简单的方式是让 AI Agent 自动处理一切：
 
-The easiest way is to let your AI Agent handle everything:
-
-**For Qoder:**
+**对于 Qoder：**
 ```
 Fetch and follow instructions from https://raw.githubusercontent.com/hdygxsj/easy-skills/master/web/public/qoder/INSTALL.md
 ```
 
-**For Cursor:**
+**对于 Cursor：**
 ```
 Fetch and follow instructions from https://raw.githubusercontent.com/hdygxsj/easy-skills/master/web/public/cursor/INSTALL.md
 ```
 
-The AI Agent will automatically:
-1. Download and install the easy-skills CLI
-2. Start the Hub service
-3. Install the skill to your IDE
+AI Agent 会自动完成：
+1. 下载并安装 easy-skills CLI
+2. 启动 Hub 服务
+3. 将 skill 安装到你的 IDE
 
-### 2. Done!
+## CLI 命令
 
-Now your AI Agent can manage skills via `/easy-skills`:
-
-```
-/easy-skills 列出 qoder 可用的 packages
-/easy-skills 帮我安装某个 package 到 qoder
-/easy-skills 查看某个 package 的详情
-/easy-skills 升级某个 package
-/easy-skills 卸载某个 package
-```
-
-**No manual commands needed** - your AI Agent handles everything!
-
-## CLI Commands
-
-| Command | Description |
-|---------|-------------|
+| 命令 | 说明 |
+|------|------|
 | `register` | 注册 Package 到 Hub |
 | `list` | 列出 Hub 中的 Packages |
 | `info` | 查看 Package 详细信息 |
 | `status` | 查看 IDE 中已安装的 Packages |
 | `serve` | 启动 Web GUI 服务 (http://localhost:27842) |
 
-## Storage
+## 数据存储
 
 ```
 ~/.local/easy-skills/
@@ -172,10 +150,10 @@ Now your AI Agent can manage skills via `/easy-skills`:
     └── cursor/
 ```
 
-## For AI Agents
+## 给 AI Agent 使用
 
-See [AGENTS.md](AGENTS.md) for AI agent usage instructions.
+详见 [AGENTS.md](AGENTS.md) 了解 AI Agent 使用说明。
 
-## License
+## 开源协议
 
 MIT

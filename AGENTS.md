@@ -86,9 +86,8 @@ On error:
 
 ### Prerequisites
 
-1. **npm Token** - 需要有 npm Granular Access Token 或开启 2FA bypass
-2. **GitHub Token** - 需要有 repo 权限的 GitHub Personal Access Token
-3. **Apple Developer Certificate** (可选) - 用于签名 Mac App，无证书时 App 会报"已损坏"
+1. **GitHub Token** - GitHub Actions 自动发布需要 repo 权限
+2. **npm Token** - GitHub Actions 会自动发布到 npm（需要在仓库 Secrets 中配置 `NPM_TOKEN`）
 
 ### Version Management
 
@@ -113,77 +112,7 @@ echo "Release version: $VERSION"
 - `0.1.5` → `0.2.0`：新增项目目录安装功能
 - `0.2.3` → `1.0.0`：完全重构数据库层、支持多 IDE
 
-### Complete Release Flow
-
-```bash
-# ========== Step 1: 构建 ==========
-
-# 读取版本号
-VERSION=$(node -p "require('./npm/package.json').version")
-
-# 构建前端（必须）
-cd web && npm install && npm run build && cd ..
-
-# 构建 CLI 跨平台二进制
-make build-cross
-
-# 构建 Mac App（需要 Rust 环境）
-make build-tauri
-
-# 构建产物位置：
-# - CLI: releases/bin/easy-skills-macos-aarch64
-# - App: releases/Easy Skills_${VERSION}_aarch64.dmg
-```
-
-```bash
-# ========== Step 2: GitHub Release ==========
-
-VERSION=$(node -p "require('./npm/package.json').version")
-
-# 方案 A: 网页操作
-# 1. 访问 https://github.com/hdygxsj/easy-skills/releases/new
-# 2. 点击 "Choose a tag" 输入 v$VERSION
-# 3. 上传两个文件：
-#    - releases/bin/easy-skills-macos-aarch64（命名为 easy-skills-cli-macos-aarch64）
-#    - releases/Easy Skills_${VERSION}_aarch64.dmg
-# 4. 点击 "Publish release"
-
-# 方案 B: API 上传（需要 GitHub Token）
-VERSION=$(node -p "require('./npm/package.json').version")
-RELEASE_ID="your_release_id"  # 从 release URL 获取
-GH_TOKEN="ghp_xxx"
-
-# 上传 CLI
-curl -X POST \
-  -H "Authorization: Bearer $GH_TOKEN" \
-  -H "Content-Type: application/octet-stream" \
-  "https://uploads.github.com/repos/hdygxsj/easy-skills/releases/$RELEASE_ID/assets?name=easy-skills-cli-macos-aarch64" \
-  --data-binary @releases/bin/easy-skills-macos-aarch64
-
-# 上传 dmg
-curl -X POST \
-  -H "Authorization: Bearer $GH_TOKEN" \
-  -H "Content-Type: application/x-apple-diskimage" \
-  "https://uploads.github.com/repos/hdygxsj/easy-skills/releases/$RELEASE_ID/assets?name=Easy%20Skills_${VERSION}_aarch64.dmg" \
-  --data-binary @releases/Easy\ Skills_${VERSION}_aarch64.dmg
-```
-
-```bash
-# ========== Step 3: npm 发布 ==========
-
-VERSION=$(node -p "require('./npm/package.json').version")
-
-# 配置 npm token
-npm config set //registry.npmjs.org/:_authToken=npm_xxx
-
-# 发布（注意：每次发布必须升级 package.json 中的版本号）
-cd npm
-npm publish
-
-# 验证
-npm view easy-skills-cli version  # 应显示 $VERSION
-npm install -g easy-skills-cli    # 测试安装
-```
+### Release Flow
 
 ### npm Package Structure
 
@@ -233,15 +162,13 @@ make source-tar    # Source archive only
 
 ### Troubleshooting
 
-**npm publish E403:** 需要配置正确的 npm token，或在 npm 网站开启 2FA bypass
-
 **App 显示已损坏:** 无签名问题，使用 `xattr -cr` 绕过或购买 Apple 开发者证书
 
 **CLI 下载失败 404:** 检查 GitHub Release 是否存在对应版本号的 tag 和 asset
 
-### Automated Release (GitHub Actions)
+### Release Flow
 
-**自动发布流程：** 只需推送一个 tag，CI 会自动构建并创建 Release。
+推送一个 tag 即可自动触发构建和发布。
 
 ```bash
 # 1. 更新版本号（npm/package.json 和 tauri.conf.json）
@@ -257,6 +184,7 @@ git push origin main --tags
 # 3. GitHub Actions 自动完成：
 #    - 构建前端 (web/)
 #    - 构建跨平台 CLI (macOS x64/ARM64, Linux x64/ARM64, Windows)
+#    - 发布 npm 包
 #    - 创建 GitHub Release 并上传产物
 ```
 

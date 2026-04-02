@@ -149,12 +149,8 @@ function App() {
       setProjects(data.projects || [])
     } catch (err) {
       console.error('Failed to fetch projects:', err)
-      // Fallback to mock
-      setProjects([
-        { name: 'local-skill-hub', path: '/Users/zhongyangyang/PycharmProjects/local-skill-hub' },
-        { name: 'my-project', path: '/Users/zhongyangyang/projects/my-project' },
-        { name: 'api-server', path: '/Users/zhongyangyang/projects/api-server' },
-      ])
+      // No fallback - show empty state
+      setProjects([])
     }
   }
 

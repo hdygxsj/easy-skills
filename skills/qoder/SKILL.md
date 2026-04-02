@@ -57,6 +57,22 @@ easy-skills reinstall --name <name> --target qoder --ide qoder
 easy-skills status --ide qoder
 ```
 
+### Project Management
+
+```bash
+# Add current directory as project
+easy-skills project add --name <project-name>
+
+# Add project with specific path
+easy-skills project add --name <project-name> --path /path/to/project
+
+# List all projects
+easy-skills project list
+
+# Remove a project
+easy-skills project remove --name <project-name>
+```
+
 ## Output Format
 
 All commands return JSON:

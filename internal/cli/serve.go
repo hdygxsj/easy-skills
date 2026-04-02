@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"syscall"
 
+	"github.com/easy-skills/easy-skills/internal/hub"
 	"github.com/spf13/cobra"
 )
 
@@ -272,10 +273,18 @@ func handlePackages(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleProjects(w http.ResponseWriter, r *http.Request) {
-	// Return list of projects with .qoder directory
-	// This could be enhanced to read from filesystem or config
-	projects := []map[string]string{
-		{"name": "local-skill-hub", "path": "/Users/zhongyangyang/PycharmProjects/local-skill-hub"},
+	// Read projects from database
+	h, err := hub.NewHub()
+	if err != nil {
+		http.Error(w, `{"error":"Failed to create hub"}`, 500)
+		return
+	}
+	defer h.Close()
+
+	projects, err := h.ListProjects()
+	if err != nil {
+		http.Error(w, `{"error":"Failed to list projects"}`, 500)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -284,7 +293,7 @@ func handleProjects(w http.ResponseWriter, r *http.Request) {
 		if i > 0 {
 			fmt.Fprint(w, ",")
 		}
-		fmt.Fprintf(w, `{"name":"%s","path":"%s"}`, p["name"], p["path"])
+		fmt.Fprintf(w, `{"name":"%s","path":"%s"}`, p.Name, p.Path)
 	}
 	fmt.Fprint(w, `]}`)
 }

@@ -73,6 +73,13 @@ func (h *DB) migrate() error {
 		install_path TEXT NOT NULL,
 		installed_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
+
+	CREATE TABLE IF NOT EXISTS projects (
+		id TEXT PRIMARY KEY,
+		name TEXT NOT NULL UNIQUE,
+		path TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);
 	`
 	_, err := h.Exec(schema)
 	return err

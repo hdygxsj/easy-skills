@@ -8,6 +8,7 @@ var (
 	flagSource string
 	flagIDE    string
 	flagScope  string
+	flagPath   string
 )
 
 func bindFlags(cmd *cobra.Command) {

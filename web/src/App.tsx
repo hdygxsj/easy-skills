@@ -10,9 +10,16 @@ interface Package {
 interface Component {
   id: string
   name: string
-  type: string
+  type: 'skill' | 'agent' | 'hook' | 'rule'
   packageName?: string
   installed?: boolean
+}
+
+type GroupedComponents = {
+  skills: Component[]
+  agents: Component[]
+  hooks: Component[]
+  rules: Component[]
 }
 
 function App() {
@@ -28,22 +35,71 @@ function App() {
   const fetchPackages = async () => {
     setLoading(true)
     // TODO: Replace with actual API call
-    // For now, show sample data
+    // For now, show sample data with type classification
     setPackages([
       {
         name: 'superpowers',
         target: target,
         version: 'v1.0.0',
-        components: ['brainstorming', 'writing-plans', 'test-driven-development']
+        components: [
+          { id: '1', name: 'brainstorming', type: 'skill', packageName: 'superpowers' },
+          { id: '2', name: 'writing-plans', type: 'skill', packageName: 'superpowers' },
+          { id: '3', name: 'test-driven-development', type: 'skill', packageName: 'superpowers' },
+          { id: '4', name: 'systematic-debugging', type: 'skill', packageName: 'superpowers' },
+          { id: '5', name: 'verification-before-completion', type: 'skill', packageName: 'superpowers' },
+          { id: '6', name: 'subagent-driven-dev', type: 'agent', packageName: 'superpowers' },
+          { id: '7', name: 'team-driven-development', type: 'agent', packageName: 'superpowers' },
+          { id: '8', name: 'code-quality-checker', type: 'agent', packageName: 'superpowers' },
+        ]
       },
       {
         name: 'open-spec',
         target: target,
         version: 'v2.0.0',
-        components: ['api-design', 'db-schema']
+        components: [
+          { id: '9', name: 'api-design', type: 'skill', packageName: 'open-spec' },
+          { id: '10', name: 'db-schema', type: 'skill', packageName: 'open-spec' },
+          { id: '11', name: 'test-gen', type: 'skill', packageName: 'open-spec' },
+          { id: '12', name: 'typescript-rules', type: 'rule', packageName: 'open-spec' },
+        ]
       }
     ])
     setLoading(false)
+  }
+
+  // Group components by type
+  const groupComponentsByType = (components: Component[]): GroupedComponents => {
+    return {
+      skills: components.filter(c => c.type === 'skill'),
+      agents: components.filter(c => c.type === 'agent'),
+      hooks: components.filter(c => c.type === 'hook'),
+      rules: components.filter(c => c.type === 'rule'),
+    }
+  }
+
+  // Render component group
+  const renderGroup = (title: string, icon: string, items: Component[]) => {
+    if (items.length === 0) return null
+    return (
+      <div className="mb-4">
+        <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+          <span>{icon}</span>
+          <span>{title}</span>
+          <span className="text-gray-400">({items.length})</span>
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 ml-4">
+          {items.map((comp) => (
+            <div key={comp.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                <span className="text-sm font-medium">{comp.name}</span>
+              </div>
+              <span className="text-xs text-gray-400">{comp.packageName}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -128,26 +184,30 @@ function App() {
             ))}
           </div>
         ) : (
-          <div className="space-y-4">
-            {packages.map((pkg) => (
-              <div key={pkg.name} className="border border-gray-200 rounded-lg overflow-hidden">
-                <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex justify-between items-center">
-                  <span className="font-medium">{pkg.name}</span>
-                  <span className="text-sm text-gray-500">{pkg.components.length} skills</span>
-                </div>
-                <div className="p-4">
-                  <div className="space-y-2">
-                    {pkg.components.map((comp: string) => (
-                      <div key={comp} className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                        <span className="text-sm">{comp}</span>
-                        <span className="text-xs text-gray-400">← {pkg.name}</span>
-                      </div>
-                    ))}
+          <div className="space-y-6">
+            {packages.map((pkg: any) => {
+              const grouped = groupComponentsByType(pkg.components)
+              return (
+                <div key={pkg.name} className="border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="bg-gray-100 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-gray-800">{pkg.name}</span>
+                      <span className="text-xs text-gray-500">v{pkg.version}</span>
+                    </div>
+                    <span className="text-sm text-gray-500">{pkg.components.length} components</span>
+                  </div>
+                  <div className="p-4">
+                    {renderGroup('🎯 Skills', '🎯', grouped.skills)}
+                    {renderGroup('🤖 Agents', '🤖', grouped.agents)}
+                    {renderGroup('🪝 Hooks', '🪝', grouped.hooks)}
+                    {renderGroup('📐 Rules', '📐', grouped.rules)}
+                    {pkg.components.length === 0 && (
+                      <p className="text-gray-400 text-sm">No components</p>
+                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </main>

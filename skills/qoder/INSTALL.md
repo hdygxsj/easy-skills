@@ -21,7 +21,7 @@ This starts the Web GUI at http://localhost:27842
 
 Fetch and follow instructions from ./SKILL.md
 
-This will install the skill file to `~/.qoder/skills/easy-skills/`.
+This will install the skill file to `~/.qoder/skills/easy-skills/SKILL.md`.
 
 ## Troubleshooting
 

@@ -1,14 +1,14 @@
 # Easy Skills
 
-This skill guides AI agents to manage skill packages using the `easy-skills` CLI for **Qoder**.
+This skill guides AI agents to manage skill packages using the `easy-skills` CLI for **Cursor**.
 
 ## Overview
 
-Easy Skills is a local skill hub that manages skill packages for Qoder IDE. Use this skill when the user wants to:
+Easy Skills is a local skill hub that manages skill packages for Cursor IDE. Use this skill when the user wants to:
 - Register packages to local Hub
 - List available packages
 - View package details
-- Install or uninstall packages to/from Qoder
+- Install or uninstall packages to/from Cursor
 - Manage projects for project-scoped installations
 - Check installation status
 
@@ -18,44 +18,44 @@ Easy Skills is a local skill hub that manages skill packages for Qoder IDE. Use 
 
 ```bash
 # Register a package to Hub
-easy-skills register --name <name> --target qoder --source <git-url>
+easy-skills register --name <name> --target cursor --source <git-url>
 ```
 
 ### List Packages
 
 ```bash
-# List all packages for Qoder
-easy-skills list --target qoder
+# List all packages for Cursor
+easy-skills list --target cursor
 ```
 
 ### Package Details
 
 ```bash
 # View package details
-easy-skills info --name <name> --target qoder
+easy-skills info --name <name> --target cursor
 ```
 
 ### Installation
 
 ```bash
-# Install package to Qoder (user scope)
-easy-skills install --name <name> --target qoder --ide qoder --scope user
+# Install package to Cursor (user scope)
+easy-skills install --name <name> --target cursor --ide cursor --scope user
 
 # Install to project scope
-easy-skills install --name <name> --target qoder --ide qoder --scope project
+easy-skills install --name <name> --target cursor --ide cursor --scope project
 
 # Uninstall package
-easy-skills uninstall --name <name> --target qoder --ide qoder --scope user
+easy-skills uninstall --name <name> --target cursor --ide cursor --scope user
 
 # Reinstall package
-easy-skills reinstall --name <name> --target qoder --ide qoder
+easy-skills reinstall --name <name> --target cursor --ide cursor
 ```
 
 ### Status
 
 ```bash
-# Check installed packages in Qoder
-easy-skills status --ide qoder
+# Check installed packages in Cursor
+easy-skills status --ide cursor
 ```
 
 ### Project Management
@@ -99,17 +99,17 @@ On error:
 ## Workflow Examples
 
 ### Check Installed Packages
-1. Run `easy-skills status --ide qoder`
+1. Run `easy-skills status --ide cursor`
 2. Parse JSON output to show installed packages
 
 ### Install a Package
-1. Register: `easy-skills register --name <pkg> --target qoder --source <url>`
-2. Install: `easy-skills install --name <pkg> --target qoder --ide qoder --scope user`
-3. Verify: `easy-skills status --ide qoder`
+1. Register: `easy-skills register --name <pkg> --target cursor --source <url>`
+2. Install: `easy-skills install --name <pkg> --target cursor --ide cursor --scope user`
+3. Verify: `easy-skills status --ide cursor`
 
 ### Uninstall a Package
-1. Run `easy-skills uninstall --name <pkg> --target qoder --ide qoder --scope user`
-2. Verify: `easy-skills status --ide qoder`
+1. Run `easy-skills uninstall --name <pkg> --target cursor --ide cursor --scope user`
+2. Verify: `easy-skills status --ide cursor`
 
 ## Web UI
 

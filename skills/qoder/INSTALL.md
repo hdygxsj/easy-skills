@@ -1,6 +1,13 @@
 # Installing Easy Skills for Qoder
 
-## Step 1: Install easy-skills
+## Step 1: Install Easy Skills Skill
+
+Fetch and follow instructions from ./SKILL.md
+
+This will install the skill file to `~/.qoder/skills/easy-skills/SKILL.md`.
+
+
+## Step 2: Install easy-skills
 
 Choose one of these methods:
 
@@ -9,19 +16,13 @@ Choose one of these methods:
 npm install -g easy-skills-cli
 ```
 
-## Step 2: Start the Hub
+## Step 3: Start the Hub
 
 ```bash
 easy-skills serve
 ```
 
 This starts the Web GUI at http://localhost:27842
-
-## Step 3: Install Easy Skills Skill
-
-Fetch and follow instructions from ./SKILL.md
-
-This will install the skill file to `~/.qoder/skills/easy-skills/SKILL.md`.
 
 ## Troubleshooting
 

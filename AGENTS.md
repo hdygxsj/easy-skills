@@ -32,14 +32,13 @@ easy-skills register --name superpowers --target qoder --source https://github.c
 
 # For Cursor: use --target cursor
 easy-skills register --name superpowers --target cursor --source https://github.com/obra/superpowers
-
-# After registering package, also register components
-easy-skills register-components --name superpowers --target <qoder|cursor>
 ```
 
-**⚠️ CRITICAL:** Always use the correct `--target` value:
-- `--target qoder` for Qoder IDE
-- `--target cursor` for Cursor IDE
+**⚠️ CRITICAL:** 
+- Always use the correct `--target` value:
+  - `--target qoder` for Qoder IDE
+  - `--target cursor` for Cursor IDE
+- The `--source` parameter **must be a Git URL**, NOT a local path like `~/.local/easy-skills`
 
 ### View Package Details
 

@@ -13,8 +13,7 @@ This skill guides AI agents to manage skill packages using the `easy-skills` CLI
 
 1. **Select correct target** - Use `--target cursor` for Cursor IDE
 2. **Register** the package to easy-skills hub via `easy-skills register`
-3. **Register components** - After registering package, use `easy-skills register-components` to register all components
-4. **Verify** registration via `easy-skills list --target cursor` and `easy-skills info --name <name> --target cursor`
+3. **Verify** registration via `easy-skills list --target cursor` and `easy-skills info --name <name> --target cursor`
 
 This ensures all installed skills are tracked and visible in the Easy Skills Hub.
 
@@ -22,30 +21,29 @@ This ensures all installed skills are tracked and visible in the Easy Skills Hub
 
 ```bash
 # Step 1: Register the package to Hub (MUST use --target cursor)
+# IMPORTANT: --source must be a Git URL (e.g., https://github.com/xxx/repo)
 easy-skills register --name superpowers --target cursor --source https://github.com/obra/superpowers
 
-# Step 2: Register all components from the package
-easy-skills register-components --name superpowers --target cursor
-
-# Step 3: Verify registration
+# Step 2: Verify registration
 easy-skills info --name superpowers --target cursor
 
-# Step 4: Copy skill files to Cursor rules directory
+# Step 3: Copy skill files to Cursor rules directory
 # User scope: ~/.cursorrules/<skill-name>/
 # Project scope: .cursorrules/<skill-name>/
 ```
 
 ### Example: User says "install X skill"
 
-1. Find the source (Git URL or local path)
-2. Run `easy-skills register --name <name> --target cursor --source <url>`
-3. Run `easy-skills register-components --name <name> --target cursor`
-4. Copy skill files to `~/.cursorrules/<name>/`
-5. Verify: `easy-skills info --name <name> --target cursor`
+1. Find the source - **must be a Git URL** (e.g., `https://github.com/xxx/repo`)
+2. Run `easy-skills register --name <name> --target cursor --source <git-url>`
+3. Copy skill files to `~/.cursorrules/<name>/`
+4. Verify: `easy-skills info --name <name> --target cursor`
 
 **DO NOT** install skills by only copying files without registering to easy-skills.
 
-**IMPORTANT:** Always use `--target cursor` when working with Cursor IDE. Using `--target qoder` or other targets is incorrect.
+**⚠️ IMPORTANT:** 
+- Always use `--target cursor` when working with Cursor IDE
+- The `--source` parameter must be a **Git URL**, NOT a local path like `~/.local/easy-skills`
 
 ## Overview
 
@@ -63,10 +61,8 @@ Easy Skills is a local skill hub that manages skill packages for Cursor IDE. Use
 
 ```bash
 # Register a package to Hub
+# IMPORTANT: --source must be a Git URL (e.g., https://github.com/xxx/repo)
 easy-skills register --name <name> --target cursor --source <git-url>
-
-# Register all components from the package source
-easy-skills register-components --name <name> --target cursor
 ```
 
 ### List Packages

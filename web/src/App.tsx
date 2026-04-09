@@ -168,7 +168,7 @@ function App() {
         target: p.package?.target || target,
         version: p.current_version?.metadata ? JSON.parse(p.current_version.metadata).version || 'v1' : 'v1',
         installed: true,
-        installPath: '~/.local/easy-skills',
+        installPath: p.package?.source || '',  // Use source from API response
         scope: 'user' as const,
         projectName: undefined,
         installedAt: p.current_version?.created_at || '',

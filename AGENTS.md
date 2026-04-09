@@ -27,15 +27,21 @@ easy-skills list --target qoder
 
 **The `--source` parameter is the LOCAL storage path** in the Hub, NOT a Git URL.
 
+**Atomic Operations:**
+| Command | What it does |
+|---------|--------------|
+| `register` | **Atomic**: registers package **AND** components together |
+| `install` | **Atomic**: copies files to IDE |
+
 ```bash
 # Step 1: Clone to local Hub storage
 mkdir -p ~/.easy-skills/packages
 git clone https://github.com/obra/superpowers ~/.easy-skills/packages/superpowers
 
-# Step 2: Register the package (--source is LOCAL path)
+# Step 2: Register (atomic: package + components)
 easy-skills register --name superpowers --target <qoder|cursor> --source ~/.easy-skills/packages/superpowers
 
-# Step 3: Install (atomic: registers components + copies files)
+# Step 3: Install (copies files to IDE)
 easy-skills install --name superpowers --target <qoder|cursor> --ide <qoder|cursor> --scope user
 ```
 

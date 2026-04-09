@@ -13,10 +13,17 @@ This skill guides AI agents to manage skill packages using the `easy-skills` CLI
 
 1. **Select correct target** - Use `--target qoder` for Qoder IDE
 2. **Clone or copy** skill files to the local Hub storage directory
-3. **Register** the package to easy-skills hub via `easy-skills register --name <name> --target qoder --source <local-path>`
+3. **Register** package and components atomically via `easy-skills register --name <name> --target qoder --source <local-path>`
 4. **Install** components to Qoder via `easy-skills install --name <name> --target qoder --ide qoder`
 
 This ensures all installed skills are tracked and visible in the Easy Skills Hub.
+
+### Atomic Operations
+
+| Command | What it does |
+|---------|--------------|
+| `register` | **Atomic**: registers package **AND** components together |
+| `install` | **Atomic**: copies files to IDE |
 
 ### Understanding --source
 
@@ -32,10 +39,10 @@ This ensures all installed skills are tracked and visible in the Easy Skills Hub
 mkdir -p ~/.easy-skills/packages
 git clone https://github.com/obra/superpowers ~/.easy-skills/packages/superpowers
 
-# Step 2: Register the package (--source is LOCAL path, not Git URL)
+# Step 2: Register (atomic: package + components)
 easy-skills register --name superpowers --target qoder --source ~/.easy-skills/packages/superpowers
 
-# Step 3: Install components to Qoder (this also registers components atomically)
+# Step 3: Install (copies files to Qoder)
 easy-skills install --name superpowers --target qoder --ide qoder --scope user
 
 # Step 4: Verify installation

@@ -12,38 +12,49 @@ This skill guides AI agents to manage skill packages using the `easy-skills` CLI
 **When installing ANY skill/package to Qoder (whether from Git URL, local files, or any source), you MUST:**
 
 1. **Select correct target** - Use `--target qoder` for Qoder IDE
-2. **Register** the package to easy-skills hub via `easy-skills register`
-3. **Verify** registration via `easy-skills list --target qoder` and `easy-skills info --name <name> --target qoder`
+2. **Clone or copy** skill files to the local Hub storage directory
+3. **Register** the package to easy-skills hub via `easy-skills register --name <name> --target qoder --source <local-path>`
+4. **Install** components to Qoder via `easy-skills install --name <name> --target qoder --ide qoder`
 
 This ensures all installed skills are tracked and visible in the Easy Skills Hub.
+
+### Understanding --source
+
+**The `--source` parameter is the LOCAL storage path** in the Hub, NOT a Git URL.
+- It tells the Hub where the package files are stored locally
+- This path is used for future operations like rollback and restore
+- Example: `--source ~/.easy-skills/packages/superpowers`
 
 ### Example: Installing a skill from Git
 
 ```bash
-# Step 1: Register the package to Hub (MUST use --target qoder)
-# IMPORTANT: --source must be a Git URL (e.g., https://github.com/xxx/repo)
-easy-skills register --name superpowers --target qoder --source https://github.com/obra/superpowers
+# Step 1: Clone the skill repo to local Hub storage
+mkdir -p ~/.easy-skills/packages
+git clone https://github.com/obra/superpowers ~/.easy-skills/packages/superpowers
 
-# Step 2: Verify registration
+# Step 2: Register the package (--source is LOCAL path, not Git URL)
+easy-skills register --name superpowers --target qoder --source ~/.easy-skills/packages/superpowers
+
+# Step 3: Install components to Qoder (this also registers components atomically)
+easy-skills install --name superpowers --target qoder --ide qoder --scope user
+
+# Step 4: Verify installation
 easy-skills info --name superpowers --target qoder
-
-# Step 3: Copy skill files to Qoder skills directory
-# User scope: ~/.qoder/skills/<skill-name>/
-# Project scope: .qoder/skills/<skill-name>/
 ```
 
 ### Example: User says "install X skill"
 
-1. Find the source - **must be a Git URL** (e.g., `https://github.com/xxx/repo`)
-2. Run `easy-skills register --name <name> --target qoder --source <git-url>`
-3. Copy skill files to `~/.qoder/skills/<name>/`
+1. Find the source - clone/copy to local Hub storage (e.g., `~/.easy-skills/packages/<name>`)
+2. Run `easy-skills register --name <name> --target qoder --source <local-path>`
+3. Run `easy-skills install --name <name> --target qoder --ide qoder --scope user`
 4. Verify: `easy-skills info --name <name> --target qoder`
 
 **DO NOT** install skills by only copying files without registering to easy-skills.
 
 **⚠️ IMPORTANT:** 
 - Always use `--target qoder` when working with Qoder IDE
-- The `--source` parameter must be a **Git URL**, NOT a local path like `~/.local/easy-skills`
+- The `--source` parameter is the **local storage path** in Hub (e.g., `~/.easy-skills/packages/<name>`)
+- This local path is used for rollback and restore operations
 
 ## Overview
 
@@ -61,8 +72,19 @@ Easy Skills is a local skill hub that manages skill packages for Qoder IDE. Use 
 
 ```bash
 # Register a package to Hub
-# IMPORTANT: --source must be a Git URL (e.g., https://github.com/xxx/repo)
-easy-skills register --name <name> --target qoder --source <git-url>
+# --source is the LOCAL storage path in Hub (used for rollback/restore)
+easy-skills register --name <name> --target qoder --source <local-path>
+```
+
+### Install Package
+
+```bash
+# Install package to Qoder (registers components + copies files atomically)
+# This is an atomic operation: registers components AND copies files to IDE
+easy-skills install --name <name> --target qoder --ide qoder --scope user
+
+# Install to project scope
+easy-skills install --name <name> --target qoder --ide qoder --scope project
 ```
 
 ### List Packages

@@ -23,22 +23,27 @@ easy-skills status --ide cursor
 easy-skills list --target qoder
 ```
 
-### Register a Package
+### Install a Package
+
+**The `--source` parameter is the LOCAL storage path** in the Hub, NOT a Git URL.
 
 ```bash
-# IMPORTANT: Select correct target based on the IDE you're working with
-# For Qoder: use --target qoder
-easy-skills register --name superpowers --target qoder --source https://github.com/obra/superpowers
+# Step 1: Clone to local Hub storage
+mkdir -p ~/.easy-skills/packages
+git clone https://github.com/obra/superpowers ~/.easy-skills/packages/superpowers
 
-# For Cursor: use --target cursor
-easy-skills register --name superpowers --target cursor --source https://github.com/obra/superpowers
+# Step 2: Register the package (--source is LOCAL path)
+easy-skills register --name superpowers --target <qoder|cursor> --source ~/.easy-skills/packages/superpowers
+
+# Step 3: Install (atomic: registers components + copies files)
+easy-skills install --name superpowers --target <qoder|cursor> --ide <qoder|cursor> --scope user
 ```
 
 **⚠️ CRITICAL:** 
 - Always use the correct `--target` value:
   - `--target qoder` for Qoder IDE
   - `--target cursor` for Cursor IDE
-- The `--source` parameter **must be a Git URL**, NOT a local path like `~/.local/easy-skills`
+- The `--source` parameter is the **local storage path** (e.g., `~/.easy-skills/packages/<name>`), used for rollback/restore
 
 ### View Package Details
 

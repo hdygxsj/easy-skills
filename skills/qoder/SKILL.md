@@ -29,16 +29,14 @@ This rule applies to:
 
 ---
 
-## IMPORTANT: Skill Installation Rule
+## Skill Installation Flow
 
-**When installing ANY skill/package to Qoder (whether from Git URL, local files, or any source), you MUST:**
+**When installing ANY skill/package to Qoder, you MUST:**
 
-1. **Select correct target** - Use `--target qoder` for Qoder IDE
-2. **Clone or copy** skill files to the local Hub storage directory
-3. **Register** package and components atomically via `easy-skills register --name <name> --target qoder --source <local-path>`
-4. **Install** components to Qoder via `easy-skills install --name <name> --target qoder --ide qoder`
-
-This ensures all installed skills are tracked and visible in the Easy Skills Hub.
+1. Use `--target qoder` for Qoder IDE
+2. Clone/copy skill files to `~/.easy-skills/packages/<name>/`
+3. Register: `easy-skills register --name <name> --target qoder --source ~/.easy-skills/packages/<name>`
+4. Install: `easy-skills install --name <name> --target qoder --ide qoder --scope user`
 
 ### Hub Cache Directory
 
@@ -46,8 +44,7 @@ All skill packages MUST be stored in the Hub cache directory:
 ```
 ~/.easy-skills/packages/<package-name>/
 ```
-
-This is the **ONLY** acceptable source path. DO NOT use other directories.
+This is the **ONLY** acceptable source path.
 
 ### Atomic Operations
 
@@ -58,136 +55,73 @@ This is the **ONLY** acceptable source path. DO NOT use other directories.
 
 ### Understanding --source
 
-**The `--source` parameter is the LOCAL storage path** in the Hub, NOT a Git URL.
-- It tells the Hub where the package files are stored locally
-- This path is used for future operations like rollback and restore
-- Example: `--source ~/.easy-skills/packages/superpowers`
+The `--source` parameter is the LOCAL storage path in the Hub, NOT a Git URL.
+- Example: `--source ~/.easy-skills/packages/<name>`
 
-### Example: Installing a skill from Git
-
-```bash
-# Step 1: Clone the skill repo to local Hub storage
-mkdir -p ~/.easy-skills/packages
-git clone https://github.com/obra/superpowers ~/.easy-skills/packages/superpowers
-
-# Step 2: Register (atomic: package + components)
-easy-skills register --name superpowers --target qoder --source ~/.easy-skills/packages/superpowers
-
-# Step 3: Install (copies files to Qoder)
-easy-skills install --name superpowers --target qoder --ide qoder --scope user
-
-# Step 4: Verify installation
-easy-skills info --name superpowers --target qoder
-```
-
-### Example: User says "install X skill"
-
-1. Find the source - clone/copy to local Hub storage (e.g., `~/.easy-skills/packages/<name>`)
-2. Run `easy-skills register --name <name> --target qoder --source <local-path>`
-3. Run `easy-skills install --name <name> --target qoder --ide qoder --scope user`
-4. Verify: `easy-skills info --name <name> --target qoder`
-
-**DO NOT** install skills by only copying files without registering to easy-skills.
-
-**⚠️ IMPORTANT:** 
-- Always use `--target qoder` when working with Qoder IDE
-- The `--source` parameter is the **local storage path** in Hub (e.g., `~/.easy-skills/packages/<name>`)
-- This local path is used for rollback and restore operations
-
-## Overview
-
-Easy Skills is a local skill hub that manages skill packages for Qoder IDE. Use this skill when the user wants to:
-- Register packages to local Hub
-- List available packages
-- View package details
-- Install or uninstall packages to/from Qoder
-- Manage projects for project-scoped installations
-- Check installation status
+---
 
 ## Commands
 
 ### Register Package
 
 ```bash
-# Register a package to Hub
-# --source is the LOCAL storage path in Hub (used for rollback/restore)
-easy-skills register --name <name> --target qoder --source <local-path>
+easy-skills register --name <name> --target qoder --source ~/.easy-skills/packages/<name>
 ```
 
 ### Install Package
 
 ```bash
-# Install package to Qoder (registers components + copies files atomically)
-# This is an atomic operation: registers components AND copies files to IDE
 easy-skills install --name <name> --target qoder --ide qoder --scope user
-
-# Install to project scope
 easy-skills install --name <name> --target qoder --ide qoder --scope project
+```
+
+### Uninstall Package
+
+```bash
+easy-skills uninstall --name <name> --target qoder --ide qoder --scope user
+```
+
+### Reinstall Package
+
+```bash
+easy-skills reinstall --name <name> --target qoder --ide qoder
 ```
 
 ### List Packages
 
 ```bash
-# List all packages for Qoder
 easy-skills list --target qoder
 ```
 
 ### Package Details
 
 ```bash
-# View package details
 easy-skills info --name <name> --target qoder
-```
-
-### Installation
-
-```bash
-# Install package to Qoder (user scope)
-easy-skills install --name <name> --target qoder --ide qoder --scope user
-
-# Install to project scope
-easy-skills install --name <name> --target qoder --ide qoder --scope project
-
-# Uninstall package
-easy-skills uninstall --name <name> --target qoder --ide qoder --scope user
-
-# Reinstall package
-easy-skills reinstall --name <name> --target qoder --ide qoder
 ```
 
 ### Status
 
 ```bash
-# Check installed packages in Qoder
 easy-skills status --ide qoder
 ```
 
 ### Project Management
 
 ```bash
-# Add current directory as project
 easy-skills project add --name <project-name>
-
-# Add project with specific path
 easy-skills project add --name <project-name> --path /path/to/project
-
-# List all projects
 easy-skills project list
-
-# Remove a project
 easy-skills project remove --name <project-name>
 ```
 
-## Output Format
+---
 
-All commands return JSON:
+## Output Format
 
 ```json
 {
   "success": true,
-  "data": {
-    "packages": [...]
-  }
+  "data": {...}
 }
 ```
 
@@ -200,8 +134,10 @@ On error:
 }
 ```
 
+---
+
 ## Web UI
 
-View skill status visually at: http://localhost:27842
+View skill status at: http://localhost:27842
 
 Start server: `easy-skills serve`

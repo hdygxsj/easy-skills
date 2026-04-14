@@ -4,13 +4,14 @@ import (
 	"fmt"
 
 	"github.com/easy-skills/easy-skills/internal/adapters/impl"
+	"github.com/easy-skills/easy-skills/internal/hub"
 	"github.com/spf13/cobra"
 )
 
 var uninstallCmd = &cobra.Command{
 	Use:   "uninstall",
 	Short: "Uninstall a package from IDE",
-	Long:  "Uninstall a package's components from the target IDE",
+	Long:  "Uninstall a package's components from the target IDE and remove installation records",
 	Run:   runUninstall,
 }
 
@@ -47,9 +48,36 @@ func runUninstall(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	// Uninstall
+	// Uninstall from IDE (delete files)
 	if err := adapter.UninstallComponent(pkgName, path); err != nil {
-		Failf("Failed to uninstall: %v", err)
+		Failf("Failed to uninstall from IDE: %v", err)
+		return
+	}
+
+	// Remove installation records from Hub database
+	h, err := hub.NewHub()
+	if err != nil {
+		Failf("Failed to create hub: %v", err)
+		return
+	}
+	defer h.Close()
+
+	// Get package
+	pkg, err := h.GetPackage(pkgName, target)
+	if err != nil {
+		// If package doesn't exist, that's OK - just return success
+		Success(map[string]interface{}{
+			"package": pkgName,
+			"scope":   scope,
+			"ide":     ide,
+			"message": fmt.Sprintf("Uninstalled %s from IDE (no Hub records found)", pkgName),
+		})
+		return
+	}
+
+	// Delete installation records for this package
+	if err := h.DeleteInstallationsByPackage(pkg.ID); err != nil {
+		Failf("Failed to delete installation records: %v", err)
 		return
 	}
 
@@ -57,6 +85,6 @@ func runUninstall(cmd *cobra.Command, args []string) {
 		"package": pkgName,
 		"scope":   scope,
 		"ide":     ide,
-		"message": fmt.Sprintf("Uninstalled %s", pkgName),
+		"message": fmt.Sprintf("Uninstalled %s and removed Hub records", pkgName),
 	})
 }

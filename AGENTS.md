@@ -19,7 +19,7 @@ easy-skills status --ide qoder
 # Check what packages are installed in Cursor
 easy-skills status --ide cursor
 
-# List all packages in Hub
+# List installed packages in Hub (only shows packages with installation records)
 easy-skills list --target qoder
 ```
 

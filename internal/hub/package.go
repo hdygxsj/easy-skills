@@ -68,6 +68,20 @@ func (h *Hub) ListPackages(target string) ([]*types.Package, error) {
 	return packages, nil
 }
 
+// DeletePackageFull deletes a package and all its versions and components
+func (h *Hub) DeletePackageFull(packageID string) error {
+	_, err := h.db.Exec(`DELETE FROM components WHERE package_id = ?`, packageID)
+	if err != nil {
+		return err
+	}
+	_, err = h.db.Exec(`DELETE FROM package_versions WHERE package_id = ?`, packageID)
+	if err != nil {
+		return err
+	}
+	_, err = h.db.Exec(`DELETE FROM packages WHERE id = ?`, packageID)
+	return err
+}
+
 func (h *Hub) PackageExists(name, target string) (bool, error) {
 	var count int
 	err := h.db.QueryRow(

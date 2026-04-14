@@ -3,28 +3,27 @@ package cli
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
-	"github.com/easy-skills/easy-skills/internal/adapters/impl"
 	"github.com/easy-skills/easy-skills/internal/hub"
 	"github.com/spf13/cobra"
 )
 
-var installScope string
-
 var installCmd = &cobra.Command{
 	Use:   "install",
-	Short: "Install a package to IDE",
-	Long:  "Install a package's components to the target IDE",
-	Run:   runInstall,
+	Short: "Verify installed components of a package",
+	Long: `Check that all registered components of a package exist at their paths.
+
+Since components are registered after installation, this command verifies
+that all component files are still in place and reports their status.`,
+	Run: runInstall,
 }
 
 func init() {
 	rootCmd.AddCommand(installCmd)
 	installCmd.Flags().StringVar(&flagName, "name", "", "Package name (required)")
 	installCmd.Flags().StringVar(&flagTarget, "target", "", "Target IDE: qoder or cursor (required)")
-	installCmd.Flags().StringVar(&flagIDE, "ide", "", "IDE to install to (qoder/cursor)")
-	installCmd.Flags().StringVar(&installScope, "scope", "user", "Installation scope: user or project")
+	installCmd.Flags().StringVar(&flagIDE, "ide", "", "IDE (qoder/cursor)")
+	installCmd.Flags().StringVar(&flagScope, "scope", "user", "Scope: user or project")
 	installCmd.MarkFlagRequired("name")
 	installCmd.MarkFlagRequired("target")
 }
@@ -32,18 +31,6 @@ func init() {
 func runInstall(cmd *cobra.Command, args []string) {
 	pkgName := flagName
 	target := flagTarget
-	ide := flagIDE
-	if ide == "" {
-		ide = target
-	}
-	scope := installScope
-
-	// Get IDE adapter
-	adapter, err := impl.Get(ide)
-	if err != nil {
-		Failf("Unsupported IDE: %s", ide)
-		return
-	}
 
 	// Get package from Hub
 	h, err := hub.NewHub()
@@ -74,47 +61,41 @@ func runInstall(cmd *cobra.Command, args []string) {
 	}
 
 	if len(components) == 0 {
-		Fail("Package has no components to install")
+		Fail("Package has no components")
 		return
 	}
 
-	// Get source path from package
-	srcDir := getPackageSourceDir(pkg.Source, pkgName)
-	if srcDir == "" {
-		Fail("Package source not available")
-		return
-	}
-
-	// Install each component
-	var installed []string
+	// Check each component's path exists
+	var results []map[string]interface{}
+	allOK := true
 	for _, comp := range components {
-		srcPath := filepath.Join(srcDir, comp.Path)
-		if _, err := os.Stat(srcPath); os.IsNotExist(err) {
-			continue
+		exists := false
+		if _, err := os.Stat(comp.Path); err == nil {
+			exists = true
 		}
+		if !exists {
+			allOK = false
+		}
+		results = append(results, map[string]interface{}{
+			"name":   comp.Name,
+			"type":   comp.Type,
+			"path":   comp.Path,
+			"exists": exists,
+		})
+	}
 
-		if err := adapter.InstallComponent(srcPath, comp.Name); err != nil {
-			Failf("Failed to install %s: %v", comp.Name, err)
-			return
-		}
-		installed = append(installed, comp.Name)
+	status := "ok"
+	msg := fmt.Sprintf("All %d component(s) verified", len(components))
+	if !allOK {
+		status = "missing"
+		msg = "Some components are missing from their registered paths"
 	}
 
 	Success(map[string]interface{}{
-		"package":    pkg,
-		"components": installed,
-		"scope":      scope,
-		"ide":        ide,
-		"message":    fmt.Sprintf("Installed %d component(s)", len(installed)),
+		"package":    pkg.Name,
+		"target":     pkg.Target,
+		"status":     status,
+		"components": results,
+		"message":    msg,
 	})
-}
-
-// getPackageSourceDir resolves the source directory for a package
-func getPackageSourceDir(source, pkgName string) string {
-	if source == "" {
-		return ""
-	}
-	// For Git URLs, this would clone/fetch; for now return empty
-	// Actual implementation would download from source
-	return ""
 }

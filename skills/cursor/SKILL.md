@@ -1,17 +1,17 @@
 ---
 name: easy-skills
-description: Manage packages for Cursor IDE using easy-skills CLI. Install any component (skills, agents, hooks, rules) via easy-skills.
+description: Manage packages for Cursor IDE using easy-skills CLI. Track scattered components (skills, agents, hooks, rules) as logical packages.
 ---
 
 # Easy Skills
 
-Manage packages and components (skills, agents, hooks, rules) for **Cursor** using the `easy-skills` CLI.
+Track and manage scattered components (skills, agents, hooks, rules) as logical packages for **Cursor**.
 
 ---
 
-## 🚨 MANDATORY RULE
+## MANDATORY RULE
 
-**ALL package/component installations MUST go through easy-skills.**
+**ALL installations MUST be registered to easy-skills after files are in place.**
 
 This applies to:
 - **Skills** - Agent skill packages
@@ -20,7 +20,20 @@ This applies to:
 - **Rules** - Coding rules and patterns
 - **Any** files installed to Cursor
 
-**Direct file copying is forbidden.**
+---
+
+## Core Concept
+
+A package is a **logical grouping** of scattered files. One package can contain multiple components in different locations:
+
+```
+Package "superpowers"
+  ├── component: skill → .cursorrules/superpowers/
+  ├── component: hook  → .cursorrules/hooks/superpowers-hook/
+  └── component: rule  → .cursorrules/rules/superpowers-rule/
+```
+
+easy-skills tracks these scattered files so they can be managed (listed, verified, uninstalled) as one unit.
 
 ---
 
@@ -28,120 +41,85 @@ This applies to:
 
 ```mermaid
 graph TD
-    A[Start] --> B{Scope?}
-    B -->|User| C[User scope]
-    B -->|Project| D[Check project registered?<br/>`easy-skills project list`]
+    A[Agent installs files to Cursor directories] --> B[Collect installed file paths]
+    B --> C{Project scope?}
+    C -->|Yes| D[Check project registered<br/>`easy-skills project list`]
     D -->|Not registered| E[Register project<br/>`easy-skills project add`]
-    D -->|Registered| G
-    E --> G
-    
-    G[Clone/Copy to Hub cache<br/>`~/.easy-skills/packages/<name>/`] --> H[Register package<br/>`easy-skills register`]
-    H --> I[Install components<br/>`easy-skills install`]
-    I --> J[Done]
-    
-    C --> G
+    D -->|Registered| F
+    E --> F
+    C -->|No / User scope| F
+    F[Register package with components<br/>`easy-skills register --component ...`]
+    F --> G[Done - files tracked]
 ```
 
 ---
 
 ## Step-by-Step Guide
 
-### Step 1: Choose Scope
+### Step 1: Install Files to Cursor
+
+Install files to their target directories as normal:
 
 ```bash
-# User scope - available to all projects
---scope user
+# User scope
+~/.cursorrules/<name>/
 
-# Project scope - available to specific project
---scope project
+# Project scope
+.cursorrules/<name>/
 ```
 
 ### Step 2: For Project Scope - Check Project Registration
 
 ```bash
-# List registered projects
 easy-skills project list
 
-# If not registered, add it
+# If not registered:
 easy-skills project add --name <project-name> --path /path/to/project
 ```
 
-### Step 3: Clone/Copy to Hub Cache
+### Step 3: Register Package with Components
+
+Register all installed files as one package. Each `--component` specifies `type:name:path`:
 
 ```bash
-# Create Hub cache directory
-mkdir -p ~/.easy-skills/packages
-
-# Clone package to Hub cache
-git clone <git-url> ~/.easy-skills/packages/<package-name>
+easy-skills register --name <package-name> --target cursor \
+  --component "skill:<skill-name>:<installed-path>" \
+  --component "hook:<hook-name>:<installed-path>" \
+  --component "rule:<rule-name>:<installed-path>"
 ```
 
-### Step 4: Register Package
+**Component types:** `skill`, `agent`, `hook`, `rule`
+
+**Example:** If you installed a skill to `~/.cursorrules/foo` and a rule to `~/.cursorrules/rules/foo-rule`:
 
 ```bash
-easy-skills register \
-  --name <package-name> \
-  --target cursor \
-  --source ~/.easy-skills/packages/<package-name>
-```
-
-### Step 5: Install to Cursor
-
-```bash
-# User scope
-easy-skills install --name <package-name> --target cursor --ide cursor --scope user
-
-# Project scope
-easy-skills install --name <package-name> --target cursor --ide cursor --scope project
+easy-skills register --name foo --target cursor \
+  --component "skill:foo:~/.cursorrules/foo" \
+  --component "rule:foo-rule:~/.cursorrules/rules/foo-rule"
 ```
 
 ---
 
-## Hub Cache Directory
+## Command Reference
 
-```
-~/.easy-skills/packages/<package-name>/
-```
-
-This is the **ONLY** acceptable source path for `--source`.
-
----
-
-## Atomic Operations
-
-| Command | Action |
-|---------|--------|
-| `register` | Registers package **AND** components together |
-| `install` | Copies files to IDE |
-| `uninstall` | Removes files from IDE **AND** deletes installation records |
-
----
-
-## Complete Command Reference
-
-### Install
+### Register (track installed files)
 
 ```bash
-easy-skills install --name <name> --target cursor --ide cursor --scope user
-easy-skills install --name <name> --target cursor --ide cursor --scope project
+easy-skills register --name <name> --target cursor \
+  --component "type:name:path" \
+  --component "type:name:path"
 ```
 
-### Uninstall
+### Verify (check files still exist)
 
 ```bash
-easy-skills uninstall --name <name> --target cursor --ide cursor --scope user
+easy-skills install --name <name> --target cursor
 ```
 
-### Reinstall
+### Uninstall (delete files + remove records)
 
 ```bash
-easy-skills reinstall --name <name> --target cursor --ide cursor
-```
-
-### Register
-
-```bash
-easy-skills register --name <name> --target cursor --source ~/.easy-skills/packages/<name>
+easy-skills uninstall --name <name> --target cursor
 ```
 
 ### List & Info

@@ -1,17 +1,17 @@
 ---
 name: easy-skills
-description: Manage packages for Qoder IDE using easy-skills CLI. Install any component (skills, agents, hooks, rules) via easy-skills.
+description: Manage packages for Qoder IDE using easy-skills CLI. Track scattered components (skills, agents, hooks, rules) as logical packages.
 ---
 
 # Easy Skills
 
-Manage packages and components (skills, agents, hooks, rules) for **Qoder** using the `easy-skills` CLI.
+Track and manage scattered components (skills, agents, hooks, rules) as logical packages for **Qoder**.
 
 ---
 
-## 🚨 MANDATORY RULE
+## MANDATORY RULE
 
-**ALL package/component installations MUST go through easy-skills.**
+**ALL installations MUST be registered to easy-skills after files are in place.**
 
 This applies to:
 - **Skills** - Agent skill packages
@@ -20,7 +20,20 @@ This applies to:
 - **Rules** - Coding rules and patterns
 - **Any** files installed to Qoder
 
-**Direct file copying is forbidden.**
+---
+
+## Core Concept
+
+A package is a **logical grouping** of scattered files. One package can contain multiple components in different locations:
+
+```
+Package "superpowers"
+  ├── component: skill → .qoder/skills/superpowers/
+  ├── component: hook  → .qoder/hooks/superpowers-hook/
+  └── component: agent → .qoder/agents/superpowers-agent/
+```
+
+easy-skills tracks these scattered files so they can be managed (listed, verified, uninstalled) as one unit.
 
 ---
 
@@ -28,120 +41,91 @@ This applies to:
 
 ```mermaid
 graph TD
-    A[Start] --> B{Scope?}
-    B -->|User| C[User scope]
-    B -->|Project| D[Check project registered?<br/>`easy-skills project list`]
+    A[Agent installs files to Qoder directories] --> B[Collect installed file paths]
+    B --> C{Project scope?}
+    C -->|Yes| D[Check project registered<br/>`easy-skills project list`]
     D -->|Not registered| E[Register project<br/>`easy-skills project add`]
-    D -->|Registered| G
-    E --> G
-    
-    G[Clone/Copy to Hub cache<br/>`~/.easy-skills/packages/<name>/`] --> H[Register package<br/>`easy-skills register`]
-    H --> I[Install components<br/>`easy-skills install`]
-    I --> J[Done]
-    
-    C --> G
+    D -->|Registered| F
+    E --> F
+    C -->|No / User scope| F
+    F[Register package with components<br/>`easy-skills register --component ...`]
+    F --> G[Done - files tracked]
 ```
 
 ---
 
 ## Step-by-Step Guide
 
-### Step 1: Choose Scope
+### Step 1: Install Files to Qoder
+
+Install files to their target directories as normal:
 
 ```bash
-# User scope - available to all projects
---scope user
+# Skills go to
+~/.qoder/skills/<name>/        # user scope
+.qoder/skills/<name>/          # project scope
 
-# Project scope - available to specific project
---scope project
+# Hooks go to
+~/.qoder/hooks/<name>/         # user scope
+.qoder/hooks/<name>/           # project scope
+
+# Agents go to
+~/.qoder/agents/<name>/        # user scope
+.qoder/agents/<name>/          # project scope
 ```
 
 ### Step 2: For Project Scope - Check Project Registration
 
 ```bash
-# List registered projects
 easy-skills project list
 
-# If not registered, add it
+# If not registered:
 easy-skills project add --name <project-name> --path /path/to/project
 ```
 
-### Step 3: Clone/Copy to Hub Cache
+### Step 3: Register Package with Components
+
+Register all installed files as one package. Each `--component` specifies `type:name:path`:
 
 ```bash
-# Create Hub cache directory
-mkdir -p ~/.easy-skills/packages
-
-# Clone package to Hub cache
-git clone <git-url> ~/.easy-skills/packages/<package-name>
+easy-skills register --name <package-name> --target qoder \
+  --component "skill:<skill-name>:<installed-path>" \
+  --component "hook:<hook-name>:<installed-path>" \
+  --component "agent:<agent-name>:<installed-path>"
 ```
 
-### Step 4: Register Package
+**Component types:** `skill`, `agent`, `hook`, `rule`
+
+**Example:** If you installed a skill to `~/.qoder/skills/foo` and a hook to `~/.qoder/hooks/foo-hook`:
 
 ```bash
-easy-skills register \
-  --name <package-name> \
-  --target qoder \
-  --source ~/.easy-skills/packages/<package-name>
-```
-
-### Step 5: Install to Qoder
-
-```bash
-# User scope
-easy-skills install --name <package-name> --target qoder --ide qoder --scope user
-
-# Project scope
-easy-skills install --name <package-name> --target qoder --ide qoder --scope project
+easy-skills register --name foo --target qoder \
+  --component "skill:foo:~/.qoder/skills/foo" \
+  --component "hook:foo-hook:~/.qoder/hooks/foo-hook"
 ```
 
 ---
 
-## Hub Cache Directory
+## Command Reference
 
-```
-~/.easy-skills/packages/<package-name>/
-```
-
-This is the **ONLY** acceptable source path for `--source`.
-
----
-
-## Atomic Operations
-
-| Command | Action |
-|---------|--------|
-| `register` | Registers package **AND** components together |
-| `install` | Copies files to IDE |
-| `uninstall` | Removes files from IDE **AND** deletes installation records |
-
----
-
-## Complete Command Reference
-
-### Install
+### Register (track installed files)
 
 ```bash
-easy-skills install --name <name> --target qoder --ide qoder --scope user
-easy-skills install --name <name> --target qoder --ide qoder --scope project
+easy-skills register --name <name> --target qoder \
+  --component "type:name:path" \
+  --component "type:name:path"
 ```
 
-### Uninstall
+### Verify (check files still exist)
 
 ```bash
-easy-skills uninstall --name <name> --target qoder --ide qoder --scope user
+easy-skills install --name <name> --target qoder
 ```
 
-### Reinstall
+### Uninstall (delete files + remove records)
 
 ```bash
-easy-skills reinstall --name <name> --target qoder --ide qoder
-```
-
-### Register
-
-```bash
-easy-skills register --name <name> --target qoder --source ~/.easy-skills/packages/<name>
+easy-skills uninstall --name <name> --target qoder
 ```
 
 ### List & Info

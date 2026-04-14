@@ -37,7 +37,7 @@ easy-skills tracks these scattered files so they can be managed (listed, verifie
 
 ---
 
-## Installation Flow
+## Normal Flow (first install)
 
 ```mermaid
 graph TD
@@ -50,6 +50,19 @@ graph TD
     C -->|No / User scope| F
     F[Register package with components<br/>`easy-skills register --component ...`]
     F --> G[Done - files tracked]
+```
+
+**No `install` needed** - files are already in place when you register.
+
+## Restore Flow (after uninstall)
+
+`install` is only needed to **restore** a previously uninstalled package:
+
+```mermaid
+graph TD
+    A[Package was uninstalled] --> B[Re-install files to Cursor directories]
+    B --> C[Register again<br/>`easy-skills register --component ...`]
+    C --> D[Done]
 ```
 
 ---
@@ -110,11 +123,13 @@ easy-skills register --name <name> --target cursor \
   --component "type:name:path"
 ```
 
-### Verify (check files still exist)
+### Install (verify / restore after uninstall)
 
 ```bash
 easy-skills install --name <name> --target cursor
 ```
+
+Only needed to check if component files still exist. Not needed after initial registration.
 
 ### Uninstall (delete files + remove records)
 
